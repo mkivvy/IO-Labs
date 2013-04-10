@@ -51,13 +51,8 @@ public class TextFileReadWrite {
             String line = contacts.readLine();
             line = contacts.readLine();
             String[] lineFields = line.split("\\^");
-                //for (String s: lineFields) {
-//                for (int i = 0; i < lineFields.length; i++) {
-//                    System.out.println(lineFields[i]);
-//                }
             System.out.println("**********Second Record **************");
             displayFormatedContacts(lineFields);
-            line = contacts.readLine();
         } catch (IOException ioe) {
             System.out.println("Problem reading file - lab 2");
         } finally {
@@ -75,7 +70,7 @@ public class TextFileReadWrite {
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(myFile, append)));
-            out.printf("\nDeanna^Moore^431 Cortez Court^Naperville^IL^60789^"
+            out.printf("Deanna^Moore^431 Cortez Court^Naperville^IL^60789^"
                     + "Ilovecats@gmail.com^708-555-6688");
         } catch (IOException ioe) {
             System.out.println("Problem reading file - lab 3a");

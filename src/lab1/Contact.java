@@ -15,6 +15,20 @@ public class Contact {
     private String emailAddr;
     private String phoneNum;
 
+    public Contact() {
+    }
+
+    public Contact(String firstName, String lastName, String streetAddr, String city, String state, String zip, String emailAddr, String phoneNum) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.streetAddr = streetAddr;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.emailAddr = emailAddr;
+        this.phoneNum = phoneNum;
+    }
+
     public String getFirstName() {
         return firstName;
     }

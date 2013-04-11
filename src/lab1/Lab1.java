@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- *
+ * Original attempt at labs - see startup for new & improved version
  * @author Mary
  */
 public class Lab1 {

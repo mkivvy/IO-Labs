@@ -16,7 +16,8 @@ import java.util.ArrayList;
  */
 public class ContactFileReadWrite {
 
-    private static final String NO_RECORDS_MSG = "No records to read.";
+    private static final String NO_RECORDS_MSG = "No records to read";
+    private static final String NO_RECORD_FOUND_MSG = "Record not found";
     private static final String FILE_NOT_FOUND_MSG = "File not found";
     private static final String FILE_ERR_MSG = "Problem reading file";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file";
@@ -61,7 +62,8 @@ public class ContactFileReadWrite {
 
     public void readContactFileRecord(int recordNum) {
         if (recordNum < FIRST_RECORD) {
-            throw new IllegalArgumentException(NO_RECORDS_MSG);
+            System.out.println(NO_RECORD_FOUND_MSG);
+            return;
         }
         ArrayList<String> fileContents = new ArrayList<String>();
         BufferedReader contactFile = null;
@@ -86,6 +88,8 @@ public class ContactFileReadWrite {
             System.out.println(FILE_NOT_FOUND_MSG);
         } catch (IOException ioe) {
             System.out.println(FILE_ERR_MSG);
+        } catch (IllegalArgumentException iae) {
+            System.out.println(iae.getMessage());
         } finally {
             try {
                 contactFile.close();
@@ -93,8 +97,15 @@ public class ContactFileReadWrite {
                 System.out.println(FILE_CLOSE_ERR_MSG);
             }
         }
-        fileContents.add(line);
-        populateContacts(fileContents);
+        try {
+            if (line == null) {
+                throw new IOException(NO_RECORD_FOUND_MSG);
+            }
+            fileContents.add(line);
+            populateContacts(fileContents);
+        } catch (IOException ioe) {
+            System.out.println(ioe.getMessage());
+        }
     }
 
     private void populateContacts(ArrayList<String> fileContents) {
@@ -115,10 +126,18 @@ public class ContactFileReadWrite {
             System.out.println("");
         }
     }
+        
+    public void displayContactsCity() {
+        for (Contact c : contacts) {
+            System.out.println(c.getCity());
+            System.out.println("");
+        }
+    }
 
     public void displayRecord(int recordNum) {
         if (recordNum < FIRST_RECORD) {
-            throw new IllegalArgumentException(NO_RECORDS_MSG);
+            System.out.println(NO_RECORDS_MSG);
+            return;
         }
         recordNum--; //offset is 1 less than record number
         Contact c = contacts.get(recordNum);
@@ -135,7 +154,7 @@ public class ContactFileReadWrite {
     public void addContactRecord(Contact contact) {
         ContactFileFormatter formatter = new ContactFileFormatter();
         String contactStr = formatter.encodeContactRecord(contact);
-        
+
         boolean append = true;
         PrintWriter out = null;
         try {

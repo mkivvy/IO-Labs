@@ -12,7 +12,7 @@ import java.io.PrintWriter;
  *
  * @author Mary
  */
-public class TextFileReadWrite {
+public class Lab1 {
     public static void main(String[] args) {
         
         File myFile = new File(File.separatorChar + "Users" 
@@ -70,7 +70,7 @@ public class TextFileReadWrite {
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(myFile, append)));
-            out.printf("Deanna^Moore^431 Cortez Court^Naperville^IL^60789^"
+            out.printf("\nDeanna^Moore^431 Cortez Court^Naperville^IL^60789^"
                     + "Ilovecats@gmail.com^708-555-6688");
         } catch (IOException ioe) {
             System.out.println("Problem reading file - lab 3a");

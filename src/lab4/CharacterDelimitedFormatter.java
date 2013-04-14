@@ -4,17 +4,19 @@ package lab4;
  *
  * @author Mary
  */
-public class CharacterDelimitedFormatter {
+public class CharacterDelimitedFormatter implements TextFileFormatterStrategy {
     public static final char NEW_LINE_CHAR = '\n';
 
     public CharacterDelimitedFormatter() {
     }
 
+    @Override
     public final String[] decodeRecord (String record, String delimiterStr) {
         String[] fields = record.split(delimiterStr);
         return fields;
     }
 
+    @Override
     public final String encodeRecord(String[] fields, char delimiterChar) {
         String recordString = "" + NEW_LINE_CHAR;
         int lastField = fields.length - 1;

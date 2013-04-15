@@ -1,16 +1,17 @@
 package lab4;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
  *
  * @author Mary
  */
-public abstract class TextFileStrategy {
+public abstract interface TextFileStrategy {
     
     public abstract ArrayList readAll();
     
-    public abstract ArrayList readOne();
+    public abstract ArrayList readOne(int recordNum);
     
     public abstract int writeAll(ArrayList list);
     
@@ -18,5 +19,5 @@ public abstract class TextFileStrategy {
     
     public abstract int closeFile();
     
-    public abstract void setFileName(String fileName);
+    public abstract void setFileName(File fileName);
 }

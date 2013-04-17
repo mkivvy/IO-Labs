@@ -11,7 +11,7 @@ public abstract interface TextFileWriteStrategy {
 
     public abstract int writeAll(ArrayList<String[]> records);
 
-    public abstract int writeOne(String[] records);
+    public abstract int writeOne(String[] recordFields);
 
     public abstract int closeFile();
 

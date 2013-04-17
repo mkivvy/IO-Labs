@@ -7,20 +7,31 @@ import java.util.ArrayList;
  * @author Mary
  */
 public class FileService {
-    
-    public ArrayList<String[]> readAllTextFile(TextFileReadStrategy textFile) {
+
+    //note FileStrategys include fileName & TextFileFormatStrategy
+    public ArrayList<String[]> readAllTextFile(TextFileReadStrategy textFileRead) {
         //validate input
-        //note TextFileStrategy includes fileName & TextFileFormatStrategy
-        return (textFile.readAll());
+        return (textFileRead.readAll());
     }
     
-    public String[] readOneTextFile(TextFileReadStrategy textFile, int recordNum) {
+    public String[] readOneTextFile(TextFileReadStrategy textFileRead, 
+            int recordNum) {
         //validate input
-        //note TextFileStrategy includes fileName & TextFileFormatStrategy
-        return (textFile.readOne(recordNum));
+        return (textFileRead.readOne(recordNum));
     }
     
-//    public void writeAllRecords (ArrayList records) {
-//        
-//    }
+    public int writeAllTextFile(TextFileWriteStrategy textFileWrite,
+            ArrayList<String[]> records) {
+        //validate
+        textFileWrite.writeAll(records);
+        return 0;
+    }
+
+    public int writeOneTextFile(TextFileWriteStrategy textFileWrite,
+            String[] recordFields) {
+        //validate
+        textFileWrite.writeOne(recordFields);
+        return 0;
+    }
+
 }

@@ -18,8 +18,8 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     
     private File fileName;
     private BufferedReader inputFile = null;
-    private ArrayList<String[]> fileRecords = new ArrayList<String[]>();
     private TextFileFormatStrategy formatter = new CSVFormatter('^');
+    private boolean fileExists = false;
     public static final int ZERO = 0;
     private String errorMsg;
     private static final int FIRST_RECORD = 1;
@@ -38,26 +38,51 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
 
     @Override
     public int writeAll(ArrayList<String[]> records) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int writeOne(String[] records) {
-        //if file exists, append; otherwise create
+        //if file exists, append; otherwise it is created
         boolean append = true;
         PrintWriter out = null;
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
-//            out.printf(contactStr);
-        } catch (IOException ioe) {
-            System.out.println(FILE_ERR_MSG);
+            String encodedRecord;
+            for (String[] sa : records) {
+                encodedRecord = formatter.encodeRecord(sa);
+                out.printf(encodedRecord);
+            }
+        } catch (FileNotFoundException nfe) { //PrintWriter exception 
+            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (SecurityException se) { //PrintWriter exception 
+            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (IOException ioe) { //FileWriter, BufferedWriter exception
+            errorMsg = FILE_ERR_MSG + fileName;
         } finally {
             try {
                 out.close();
             } catch (Exception e) {
                 System.out.println(FILE_CLOSE_ERR_MSG);
             }
+        }
+        return 0;
+    }
+
+    @Override
+    public int writeOne(String[] recordFields) {
+        //if file exists, append; otherwise it is created
+        boolean append = true;
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(
+                    new BufferedWriter(new FileWriter(fileName, append)));
+            String encodedRecord = formatter.encodeRecord(recordFields);
+            out.printf(encodedRecord);
+        } catch (FileNotFoundException nfe) { //PrintWriter exception 
+            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (SecurityException se) { //PrintWriter exception 
+            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (IOException ioe) { //FileWriter, BufferedWriter exception
+            errorMsg = FILE_ERR_MSG + fileName;
+        } finally {
+            out.close();
         }
         return 0;
     }
@@ -75,14 +100,14 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     @Override
     public final void setFileName(File fileName) {
         try {
-            if (!(fileName.exists())) {
-                throw new IOException();
-            }
-            if (!(fileName.isFile())){
-                throw new IOException();
-            }
-            if (!(fileName.canRead())){
-                throw new IOException();
+            if (fileName.exists()) {
+                fileExists = true;
+                if (!(fileName.isFile())){
+                    throw new IOException();
+                }
+                if (!(fileName.canWrite())){
+                    throw new IOException();
+                }
             }
         } catch (IOException e) {
             errorMsg = "File " + fileName + " does not exist.";
@@ -96,7 +121,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     }
 
     public final void setFormatter(TextFileFormatStrategy formatter) {
-        //throw new Exception("Not supported yet.");
+        //validate
         this.formatter = formatter;
     }
 }

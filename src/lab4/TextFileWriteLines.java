@@ -18,7 +18,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     
     private File fileName;
     private BufferedReader inputFile = null;
-    private TextFileFormatStrategy formatter = new CSVFormatter('^');
+    private TextFileFormatStrategy formatter = new CSVPlusFormatter('^');
     private boolean fileExists = false;
     public static final int ZERO = 0;
     private String errorMsg;

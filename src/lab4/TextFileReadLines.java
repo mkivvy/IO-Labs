@@ -16,7 +16,7 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private File fileName;
     private BufferedReader inputFile = null;
     private ArrayList<String[]> fileRecords = new ArrayList<String[]>();
-    private TextFileFormatStrategy formatter = new CSVFormatter('^');
+    private TextFileFormatStrategy formatter = new CSVPlusFormatter('^');
     public static final int ZERO = 0;
     private String errorMsg;
     private static final int FIRST_RECORD = 1;

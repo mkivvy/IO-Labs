@@ -3,6 +3,7 @@ package lab4;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -12,7 +13,7 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
 
     private char delimiterChar;
     private String delimiterStr;
-    public static final char NEW_LINE_CHAR = '\n';
+    public static final String NEW_LINE_STR = "\n";
     public static final String DOUBLE_BACKSLASH = "\\";
     public static final int ZERO = 0;
     public static final int ONE = 1;
@@ -23,17 +24,16 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
     }
 
     @Override
-    public List<LinkedHashMap<String, String>> decodeRecord
-            (List<String> rawData, boolean hasHeader) {
-        
+    public List<LinkedHashMap<String, String>> decodeRecord(List<String> rawData, boolean hasHeader) {
+
         //First, create an arraylist of linkedhashmaps to be returned to caller
-        List<LinkedHashMap<String, String>> decodedData = 
-                new ArrayList<LinkedHashMap<String,String>>();
-        
+        List<LinkedHashMap<String, String>> decodedData =
+                new ArrayList<LinkedHashMap<String, String>>();
+
         //initialize temporary variables
         int lineCount = ZERO;
         String[] header = null;
-        
+
         //Now we loop through the list of strings(lines) passed in
         for (String data : rawData) {
             lineCount++;
@@ -42,12 +42,12 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
             if (hasHeader && (lineCount == FIRST)) {
                 header = splitData; //this is the header row, set header values
             }
-            
+
             //create the linkedhashmap to contain record data
-            LinkedHashMap<String, String> record = 
-                        new LinkedHashMap<String,String>();
+            LinkedHashMap<String, String> record =
+                    new LinkedHashMap<String, String>();
             //loop through each field from the split line 
-            for (int i = ZERO; i < splitData.length; i++){
+            for (int i = ZERO; i < splitData.length; i++) {
                 if (hasHeader && lineCount == FIRST) {
                     continue; //already took care of header row above
                 } else if (hasHeader) {
@@ -57,26 +57,25 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
                 } else { //no header
                     //populate String1 w/field number to keep key unique
                     //& String2 w/data
-                    record.put(""+i, splitData[i]);
+                    record.put("" + i, splitData[i]);
                 }
-        } //finished 2nd for loop & have completed record
-        if (hasHeader && lineCount == FIRST) { 
-            //do nothing - don't need a header row keyed w/header fields
-        } else {
-            decodedData.add(record);
-        }
-    } //finished 1st for loop & processed all input data - whew!!
-    return decodedData;
-}
+            } //finished 2nd for loop & have completed record
+            if (hasHeader && lineCount == FIRST) {
+                //do nothing - don't need a header row keyed w/header fields
+            } else {
+                decodedData.add(record);
+            }
+        } //finished 1st for loop & processed all input data - whew!!
+        return decodedData;
+    }
 //    public final String[] decodeRecord(String record) {
 //        String[] fields = record.split(delimiterStr);
 //        return fields;
 //    }
 
     @Override
-    public final List<String> encodeRecord
-            (List<LinkedHashMap<String,String>> fields) {
-//        StringBuilder strBldRecord = new StringBuilder("" + NEW_LINE_CHAR);
+    public final List<String> encodeRecord(List<LinkedHashMap<String, String>> records, boolean hasHeader) {
+//        StringBuilder strBldRecord = new StringBuilder(NEW_LINE_STR);
 //        int lastField = fields.length - ONE; //last field is 1 less than length
 //        for (int i = ZERO; i < fields.length; i++) {
 //            strBldRecord.append(fields[i]);
@@ -85,12 +84,44 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
 //            }
 //        }
 //        return strBldRecord.toString();
+        //input = multiple records, possibly w/ headers
+        //output = an array of Strings ready to be written
         List<String> encodedData = new ArrayList<String>();
+        //initialize temporary variables
+        int recordCount = ZERO;
+        StringBuilder line = new StringBuilder();
+        Set<String> keys = null;
+        for (LinkedHashMap record : records) {
+            line.append(NEW_LINE_STR);
+            recordCount++;
+            keys = record.keySet();
+            int lastField = keys.size();
+            int fieldCount = 1;
+            if (hasHeader && recordCount == FIRST) {
+                for (String key : keys) {
+                    line.append(key);
+                    if (fieldCount < lastField) {
+                        line.append(delimiterChar);
+                    }//don't want delimiter after last field
+                }
+                encodedData.add(line.toString());
+                line.delete(ZERO, line.length());
+                line.append(NEW_LINE_STR);
+            }
+            for (String key : keys) {
+                String field = (String) record.get(key);
+                line.append(field);
+                if (fieldCount < lastField) {
+                    line.append(delimiterChar);
+                }//don't want delimiter after last field
+            }
+            encodedData.add(line.toString());
+            line.delete(ZERO, line.length());
+        }
         return encodedData;
-
     }
 //    public final String encodeRecord(String[] fields) {
-//        StringBuilder strBldRecord = new StringBuilder("" + NEW_LINE_CHAR);
+//        StringBuilder strBldRecord = new StringBuilder("" + NEW_LINE_STR);
 //        int lastField = fields.length - ONE; //last field is 1 less than length
 //        for (int i = ZERO; i < fields.length; i++) {
 //            strBldRecord.append(fields[i]);
@@ -136,10 +167,13 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
         rawData.add("Laura!Strecjek!405 Walker Road!Normal!IL!60621!mywedding@gmail.com!796-555-6752");
         CSVPlusFormatter csv = new CSVPlusFormatter(Delimiters.EXLAMATION_POINT);
         List<LinkedHashMap<String, String>> myMap =
-            csv.decodeRecord(rawData, true);
+                csv.decodeRecord(rawData, true);
         for (LinkedHashMap record : myMap) {
             System.out.println(record);
         }
+        List<String> recordStrings = csv.encodeRecord(myMap, true);
+        for (String s : recordStrings) {
+            System.out.println(s);
+        }
     }
-
 }

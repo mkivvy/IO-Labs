@@ -14,7 +14,7 @@ public abstract interface TextFileFormatStrategy {
  //   public abstract String[] decodeRecord(String record);
 
     public abstract List<String> encodeRecord
-            (List<LinkedHashMap<String,String>> fields);
+            (List<LinkedHashMap<String,String>> records, boolean hasHeader);
 //    public abstract String encodeRecord(String[] fields);
     
 }

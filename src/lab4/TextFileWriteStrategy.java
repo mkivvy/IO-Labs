@@ -1,6 +1,7 @@
 package lab4;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -16,5 +17,6 @@ public abstract interface TextFileWriteStrategy {
     public abstract int writeOne
             (List<LinkedHashMap<String, String>> records);
 
-    public abstract void setFileName(File fileName);
+    public abstract void setFileName(File fileName) throws 
+            IllegalArgumentException, IOException;
 }

@@ -26,6 +26,13 @@ public class TextFileReadLines implements TextFileReadStrategy {
     public static final int MAX_RECORDS = 500;
     private String errorMsg;
     private static final int FIRST_RECORD = 1;
+    private static final String NO_FILE_NAME_MSG = 
+            "File name is empty.  A valid file name is required.";
+    private static final String FILE_NOT_EXIST_MSG = " does not exist.";
+    private static final String NOT_FILE_TYPE_MSG = " is not of type File ";
+    private static final String NOT_READABLE_MSG = " cannot be read.";
+    private static final String NO_FORMAT_STRATEGY_MSG = "No format strategy "
+            + "was specified.  A valid format strategy is required.";
     private static final String LARGE_FILE_MSG = 
             "Cannot read all records.  " 
             + "File contains more than the maximum number of records allowed: " 
@@ -39,12 +46,19 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
     public TextFileReadLines(File fileName, TextFileFormatStrategy formatter) {
-        setFileName(fileName);
-        setFormatter(formatter);
+        try {
+            setFileName(fileName);
+            setFormatter(formatter);
+        } catch (IllegalArgumentException ia) {
+            errorMsg = ia.getMessage();
+        } catch (IOException e) {
+            errorMsg = e.getMessage();
+        }
     }
 
     @Override
     public final List<LinkedHashMap<String, String>> readAll(boolean hasHeader) {
+        
         this.hasHeader = hasHeader;
         ArrayList<String> fileContents = new ArrayList<String>();
         try {
@@ -60,8 +74,7 @@ public class TextFileReadLines implements TextFileReadStrategy {
                 lineCount++;
             }
             if (lineCount == MAX_RECORDS) {
-                throw new NoRecordException(LARGE_FILE_MSG + fileName);
-                //errorMsg = FILE_ERR_MSG + fileName; //need catch for this
+                throw new LargeFileException(LARGE_FILE_MSG + fileName);
             }
         } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
             errorMsg = nre.getMessage();
@@ -80,10 +93,11 @@ public class TextFileReadLines implements TextFileReadStrategy {
 
     @Override
     public final List<LinkedHashMap<String, String>> readOne(int recordNum) {
-        hasHeader = false; //only reading 1 record
+        
         if (recordNum < FIRST_RECORD) {
             throw new IllegalArgumentException(RECORD_NUMBER_MSG);
         }
+        hasHeader = false; //only reading 1 record & not including header
         ArrayList<String> fileContents = new ArrayList<String>();
         String line = null;
         try {
@@ -135,19 +149,19 @@ public class TextFileReadLines implements TextFileReadStrategy {
     }
 
     @Override
-    public final void setFileName(File fileName) {
-        try {
-            if (!(fileName.exists())) {
-                throw new IOException();
-            }
-            if (!(fileName.isFile())){
-                throw new IOException();
-            }
-            if (!(fileName.canRead())){
-                throw new IOException();
-            }
-        } catch (IOException e) {
-            errorMsg = "File " + fileName + " does not exist.";
+    public final void setFileName(File fileName) throws 
+            IllegalArgumentException, IOException {
+        if (fileName == null) {
+            throw new IllegalArgumentException(NO_FILE_NAME_MSG);
+        }
+        if (!(fileName.exists())) {
+            throw new IOException(fileName + FILE_NOT_EXIST_MSG);
+        }
+        if (!(fileName.isFile())){
+            throw new IOException(fileName + NOT_FILE_TYPE_MSG);
+        }
+        if (!(fileName.canRead())){
+            throw new IOException(fileName + NOT_READABLE_MSG);
         }
 
         this.fileName = fileName;
@@ -157,9 +171,55 @@ public class TextFileReadLines implements TextFileReadStrategy {
         return formatter;
     }
 
-    public final void setFormatter(TextFileFormatStrategy formatter) {
-        //throw new Exception("Not supported yet.");
+    public final void setFormatter(TextFileFormatStrategy formatter) throws
+            IllegalArgumentException {
+        if (formatter == null) {
+            throw new IllegalArgumentException(NO_FORMAT_STRATEGY_MSG);
+        }
         this.formatter = formatter;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 31 * hash + (this.fileName != null ? this.fileName.hashCode() : 0);
+        hash = 31 * hash + (this.formatter != null ? this.formatter.hashCode() : 0);
+        hash = 31 * hash + (this.decodedRecords != null ? this.decodedRecords.hashCode() : 0);
+        hash = 31 * hash + (this.hasHeader ? 1 : 0);
+        hash = 31 * hash + (this.errorMsg != null ? this.errorMsg.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TextFileReadLines other = (TextFileReadLines) obj;
+        if (this.fileName != other.fileName && (this.fileName == null || !this.fileName.equals(other.fileName))) {
+            return false;
+        }
+        if (this.formatter != other.formatter && (this.formatter == null || !this.formatter.equals(other.formatter))) {
+            return false;
+        }
+        if (this.decodedRecords != other.decodedRecords && (this.decodedRecords == null || !this.decodedRecords.equals(other.decodedRecords))) {
+            return false;
+        }
+        if (this.hasHeader != other.hasHeader) {
+            return false;
+        }
+        if ((this.errorMsg == null) ? (other.errorMsg != null) : !this.errorMsg.equals(other.errorMsg)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "TextFileReadLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", decodedRecords=" + decodedRecords + ", hasHeader=" + hasHeader + ", errorMsg=" + errorMsg + '}';
     }
     
     public static void main(String[] args) {

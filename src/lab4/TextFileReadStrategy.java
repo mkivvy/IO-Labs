@@ -1,6 +1,7 @@
 package lab4;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -14,5 +15,6 @@ public abstract interface TextFileReadStrategy {
     
     public abstract List<LinkedHashMap<String, String>> readOne(int recordNum);
     
-    public abstract void setFileName(File fileName);
+    public abstract void setFileName(File fileName) throws 
+            IllegalArgumentException, IOException;
 }

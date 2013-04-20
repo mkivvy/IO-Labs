@@ -17,6 +17,10 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
     public static final int ZERO = 0;
     public static final int ONE = 1;
     public static final int FIRST = 1;
+    public static final String NO_RECORDS_DECODE_MSG 
+            = "There are no records to decode.";
+    public static final String NO_RECORDS_ENCODE_MSG 
+            = "There are no records to encode.";
 
     public CSVPlusFormatter(Delimiters delimiter) {
         setDelimiters(delimiter);
@@ -24,7 +28,14 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
 
     @Override
     public List<LinkedHashMap<String, String>> decodeRecords
-            (List<String> rawData, boolean hasHeader) {
+            (List<String> rawData, boolean hasHeader) 
+            throws NullPointerException, IllegalArgumentException {
+        if (rawData == null) {
+            throw new NullPointerException(NO_RECORDS_DECODE_MSG );
+        }
+        if (rawData.isEmpty()) {
+            throw new IllegalArgumentException(NO_RECORDS_DECODE_MSG );
+        }
 
         //First, create an arraylist of linkedhashmaps to be returned to caller
         List<LinkedHashMap<String, String>> decodedData =
@@ -71,7 +82,14 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
 
     @Override
     public final List<String> encodeRecords
-            (List<LinkedHashMap<String, String>> records, boolean hasHeader) {
+            (List<LinkedHashMap<String, String>> records, boolean hasHeader) 
+            throws NullPointerException, IllegalArgumentException {
+        if (records == null) {
+            throw new NullPointerException(NO_RECORDS_ENCODE_MSG );
+        }
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException(NO_RECORDS_ENCODE_MSG );
+        }
         //initialize output, an array of Strings ready to be written
         List<String> encodedData = new ArrayList<String>();
         //initialize temporary variables
@@ -130,6 +148,37 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
         delimiterChar = delimiter.getValue();
         delimiterStr = DOUBLE_BACKSLASH + delimiterChar;
 //        System.out.printf("char=%c  string =%s", delimiterChar, delimiterStr);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + this.delimiterChar;
+        hash = 47 * hash + (this.delimiterStr != null ? this.delimiterStr.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final CSVPlusFormatter other = (CSVPlusFormatter) obj;
+        if (this.delimiterChar != other.delimiterChar) {
+            return false;
+        }
+        if ((this.delimiterStr == null) ? (other.delimiterStr != null) : !this.delimiterStr.equals(other.delimiterStr)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "CSVPlusFormatter{" + "delimiterChar=" + delimiterChar + ", delimiterStr=" + delimiterStr + '}';
     }
 
     public static void main(String[] args) {

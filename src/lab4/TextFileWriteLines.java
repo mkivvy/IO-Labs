@@ -21,26 +21,40 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     private BufferedReader inputFile = null;
     private TextFileFormatStrategy formatter;
     private boolean hasHeader = false;
-    private boolean fileExists = false;
     public static final int ZERO = 0;
     private String errorMsg;
-    private static final int FIRST_RECORD = 1;
-    private static final String NO_RECORDS_MSG = "No records to read in file ";
-    private static final String RECORD_NUMBER_MSG =
-            "Record number must be more than 0";
-    private static final String NO_RECORD_FOUND_MSG = "Record not found in file ";
+    private static final String NO_FILE_NAME_MSG = 
+            "File name is empty.  A valid file name is required.";
+    private static final String NOT_FILE_TYPE_MSG = " is not of type File ";
+    private static final String NOT_WRITABLE_MSG = " cannot be written to.";
+    private static final String NO_FORMAT_STRATEGY_MSG = "No format strategy "
+            + "was specified.  A valid format strategy is required.";
+    private static final String NO_RECORDS_TO_WRITE_MSG = "Record not found in file ";
     private static final String FILE_NOT_FOUND_MSG = "File not found: ";
     private static final String FILE_ERR_MSG = "Cannot read file ";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
     public TextFileWriteLines(File fileName, TextFileFormatStrategy formatter) {
-        setFileName(fileName);
-        setFormatter(formatter);
+        try {
+            setFileName(fileName);
+            setFormatter(formatter);
+        } catch (IllegalArgumentException ia) {
+            errorMsg = ia.getMessage();
+        } catch (IOException e) {
+            errorMsg = e.getMessage();
+        }
     }
 
     @Override
     public int writeAll(List<LinkedHashMap<String, String>> records,
             boolean hasHeader) {
+        if (records == null) {
+            throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
+        }
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
+        }
+
         List<String> encodedRecords = new ArrayList<String>();
         //if file exists, append; otherwise it is created
         boolean append = true;
@@ -50,6 +64,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
             encodedRecords = formatter.encodeRecords(records, hasHeader);
+            //formatter throws NullPointerException, IllegalArgumentException
             for (String s : encodedRecords) {
                 out.println(s);
                 recordsWritten++;
@@ -61,17 +76,20 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         } catch (IOException ioe) { //FileWriter, BufferedWriter exception
             errorMsg = FILE_ERR_MSG + fileName;
         } finally {
-            try {
-                out.close();
-            } catch (Exception e) {
-                System.out.println(FILE_CLOSE_ERR_MSG);
-            }
+            out.close();
         }
         return recordsWritten;
     }
 
     @Override
     public int writeOne(List<LinkedHashMap<String, String>> records) {
+        if (records == null) {
+            throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
+        }
+        if (records.isEmpty()) {
+            throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
+        }
+
         List<String> encodedRecords = new ArrayList<String>();
         hasHeader = false; //only writing one record, not header + record
         //if file exists, append; otherwise it is created
@@ -108,21 +126,19 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     }
 
     @Override
-    public final void setFileName(File fileName) {
-        try {
-            if (fileName.exists()) {
-                fileExists = true;
-                if (!(fileName.isFile())){
-                    throw new IOException();
-                }
-                if (!(fileName.canWrite())){
-                    throw new IOException();
-                }
-            }
-        } catch (IOException e) {
-            errorMsg = "File " + fileName + " does not exist.";
+    public final void setFileName(File fileName) throws 
+            IllegalArgumentException, IOException{
+        if (fileName == null) {
+            throw new IllegalArgumentException(NO_FILE_NAME_MSG);
         }
-
+        if (fileName.exists()) {
+            if (!(fileName.isFile())){
+                throw new IOException(fileName + NOT_FILE_TYPE_MSG);
+            }
+            if (!(fileName.canWrite())){
+                throw new IOException(fileName + NOT_WRITABLE_MSG);
+            }
+        }
         this.fileName = fileName;
     }
 
@@ -130,10 +146,45 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return formatter;
     }
 
-    public final void setFormatter(TextFileFormatStrategy formatter) {
-        //validate
+    public final void setFormatter(TextFileFormatStrategy formatter) throws 
+            IllegalArgumentException {
+        if (formatter == null) {
+            throw new IllegalArgumentException(NO_FORMAT_STRATEGY_MSG);
+        }
         this.formatter = formatter;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 41 * hash + (this.fileName != null ? this.fileName.hashCode() : 0);
+        hash = 41 * hash + (this.formatter != null ? this.formatter.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final TextFileWriteLines other = (TextFileWriteLines) obj;
+        if (this.fileName != other.fileName && (this.fileName == null || !this.fileName.equals(other.fileName))) {
+            return false;
+        }
+        if (this.formatter != other.formatter && (this.formatter == null || !this.formatter.equals(other.formatter))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "TextFileWriteLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", hasHeader=" + hasHeader + ", errorMsg=" + errorMsg + '}';
+    }
+    
     public static void main(String[] args) {
         File myFile = new File(File.separatorChar + "Users" 
             + File.separatorChar + "Mary"

@@ -83,7 +83,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
                     new BufferedWriter(new FileWriter(fileName, append)));
             encodedRecords = formatter.encodeRecords(records, hasHeader);
             for (String s : encodedRecords) {
-                out.printf(s);
+                out.println(s);
                 recordsWritten++;
             }
         } catch (FileNotFoundException nfe) { //PrintWriter exception 

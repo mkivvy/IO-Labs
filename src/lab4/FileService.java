@@ -1,6 +1,5 @@
 package lab4;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -9,9 +8,6 @@ import java.util.List;
  * @author Mary
  */
 public class FileService {
-
-    
-    //note FileStrategys include fileName & TextFileFormatStrategy
     public List<LinkedHashMap<String, String>> readAllTextFile
             (TextFileReadStrategy textFileRead, boolean hasHeader) {
         //validate input

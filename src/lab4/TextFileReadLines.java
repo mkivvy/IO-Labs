@@ -24,8 +24,8 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private boolean hasHeader = false;
     public static final int ZERO = 0;
     public static final int MAX_RECORDS = 500;
-    private String errorMsg;
     private static final int FIRST_RECORD = 1;
+    private static final String SPACE_STR = " ";
     private static final String NO_FILE_NAME_MSG = 
             "File name is empty.  A valid file name is required.";
     private static final String FILE_NOT_EXIST_MSG = " does not exist.";
@@ -46,20 +46,20 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
     public TextFileReadLines(File fileName, TextFileFormatStrategy formatter) 
-            throws TextFileReadException {
+            throws TextFileReadWriteException {
         try {
             setFileName(fileName);
             setFormatter(formatter);
         } catch (IllegalArgumentException ia) {
-            throw new TextFileReadException(ia.getMessage());
+            throw new TextFileReadWriteException(ia.getMessage());
         } catch (IOException io) {
-            throw new TextFileReadException(io.getMessage());
+            throw new TextFileReadWriteException(io.getMessage());
         }
     }
 
     @Override
     public final List<LinkedHashMap<String, String>> readAll(boolean hasHeader) 
-            throws TextFileReadException {
+            throws TextFileReadWriteException {
         
         this.hasHeader = hasHeader;
         ArrayList<String> fileContents = new ArrayList<String>();
@@ -80,39 +80,42 @@ public class TextFileReadLines implements TextFileReadStrategy {
                 throw new LargeFileException(LARGE_FILE_MSG + fileName);
             }
         } catch (NoRecordException nr) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(nr.getMessage());
+            throw new TextFileReadWriteException(nr.getMessage());
         } catch (LargeFileException lf) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(lf.getMessage());
+            throw new TextFileReadWriteException(lf.getMessage());
         } catch (IllegalArgumentException ia) { //BufferedReader exception
-            throw new TextFileReadException(ia.getMessage());
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + ia.getMessage());
         } catch (FileNotFoundException nf) { //FileReader exception 
-            throw new TextFileReadException(FILE_NOT_FOUND_MSG + fileName);
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + nf.getMessage());
         } catch (IOException io) { //BufferedReader read exception
-            throw new TextFileReadException(FILE_ERR_MSG + fileName);
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + io.getMessage());
         } finally {
             try {
                 inputFile.close();
             } catch (IOException io) {
-                throw new TextFileReadException(FILE_CLOSE_ERR_MSG + fileName +
-                        io.getMessage());
+                throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
+                        + fileName + SPACE_STR + io.getMessage());
             }
         }
         try { //this try block does the post-read processing
             decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
-        } catch (NullPointerException np) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(np.getMessage());
-        } catch (IllegalArgumentException ia) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(ia.getMessage());
+        } catch (NullPointerException np) { 
+            throw new TextFileReadWriteException(np.getMessage());
+        } catch (IllegalArgumentException ia) { 
+            throw new TextFileReadWriteException(ia.getMessage());
         }
         return decodedRecords;
     }
 
     @Override
     public final List<LinkedHashMap<String, String>> readOne(int recordNum) 
-            throws TextFileReadException {
+            throws TextFileReadWriteException {
         
         if (recordNum < FIRST_RECORD) {
-            throw new TextFileReadException(RECORD_NUMBER_MSG);
+            throw new TextFileReadWriteException(RECORD_NUMBER_MSG);
         }
         hasHeader = false; //only reading 1 record & not including header
         ArrayList<String> fileContents = new ArrayList<String>();
@@ -134,20 +137,23 @@ public class TextFileReadLines implements TextFileReadStrategy {
                 }
             }
 
-        } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(nre.getMessage());
+        } catch (NoRecordException nr) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadWriteException(nr.getMessage());
         } catch (IllegalArgumentException ia) { //BufferedReader exception
-            throw new TextFileReadException(ia.getMessage());
-        } catch (FileNotFoundException nfe) { //FileReader exception 
-            throw new TextFileReadException(FILE_NOT_FOUND_MSG + fileName);
-        } catch (IOException ioe) { //BufferedReader read exception
-            throw new TextFileReadException(FILE_ERR_MSG + fileName);
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + ia.getMessage());
+        } catch (FileNotFoundException nf) { //FileReader exception 
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + nf.getMessage());
+        } catch (IOException io) { //BufferedReader read exception
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + io.getMessage());
         } finally {
             try {
                 inputFile.close();
             } catch (IOException io) {
-                throw new TextFileReadException(FILE_CLOSE_ERR_MSG + fileName +
-                        io.getMessage());
+                throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
+                        + fileName + io.getMessage());
             }
         }
         
@@ -157,12 +163,12 @@ public class TextFileReadLines implements TextFileReadStrategy {
             }
             fileContents.add(line);
             decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
-        } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(nre.getMessage());
-        } catch (NullPointerException np) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(np.getMessage());
-        } catch (IllegalArgumentException ia) { //Custom - Invalid Parm/IllegalArg
-            throw new TextFileReadException(ia.getMessage());
+        } catch (NoRecordException nr) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadWriteException(nr.getMessage());
+        } catch (NullPointerException np) { 
+            throw new TextFileReadWriteException(np.getMessage());
+        } catch (IllegalArgumentException ia) { 
+            throw new TextFileReadWriteException(ia.getMessage());
         }
         return decodedRecords;
     }
@@ -205,7 +211,6 @@ public class TextFileReadLines implements TextFileReadStrategy {
         hash = 31 * hash + (this.formatter != null ? this.formatter.hashCode() : 0);
         hash = 31 * hash + (this.decodedRecords != null ? this.decodedRecords.hashCode() : 0);
         hash = 31 * hash + (this.hasHeader ? 1 : 0);
-        hash = 31 * hash + (this.errorMsg != null ? this.errorMsg.hashCode() : 0);
         return hash;
     }
 
@@ -230,15 +235,12 @@ public class TextFileReadLines implements TextFileReadStrategy {
         if (this.hasHeader != other.hasHeader) {
             return false;
         }
-        if ((this.errorMsg == null) ? (other.errorMsg != null) : !this.errorMsg.equals(other.errorMsg)) {
-            return false;
-        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "TextFileReadLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", decodedRecords=" + decodedRecords + ", hasHeader=" + hasHeader + ", errorMsg=" + errorMsg + '}';
+        return "TextFileReadLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", decodedRecords=" + decodedRecords + ", hasHeader=" + hasHeader + '}';
     }
     
     public static void main(String[] args) {

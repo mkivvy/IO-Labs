@@ -22,32 +22,34 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     private TextFileFormatStrategy formatter;
     private boolean hasHeader = false;
     public static final int ZERO = 0;
-    private String errorMsg;
+    private static final String SPACE_STR = " ";
     private static final String NO_FILE_NAME_MSG = 
             "File name is empty.  A valid file name is required.";
     private static final String NOT_FILE_TYPE_MSG = " is not of type File ";
     private static final String NOT_WRITABLE_MSG = " cannot be written to.";
     private static final String NO_FORMAT_STRATEGY_MSG = "No format strategy "
             + "was specified.  A valid format strategy is required.";
-    private static final String NO_RECORDS_TO_WRITE_MSG = "Record not found in file ";
+    private static final String NO_RECORDS_TO_WRITE_MSG = 
+            "The input contains no records to be written.";
     private static final String FILE_NOT_FOUND_MSG = "File not found: ";
     private static final String FILE_ERR_MSG = "Cannot read file ";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
-    public TextFileWriteLines(File fileName, TextFileFormatStrategy formatter) {
+    public TextFileWriteLines(File fileName, TextFileFormatStrategy formatter) 
+            throws TextFileReadWriteException {
         try {
             setFileName(fileName);
             setFormatter(formatter);
         } catch (IllegalArgumentException ia) {
-            errorMsg = ia.getMessage();
+            throw new TextFileReadWriteException(ia.getMessage());
         } catch (IOException e) {
-            errorMsg = e.getMessage();
+            throw new TextFileReadWriteException(e.getMessage());
         }
     }
 
     @Override
     public int writeAll(List<LinkedHashMap<String, String>> records,
-            boolean hasHeader) {
+            boolean hasHeader) throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
         }
@@ -69,20 +71,33 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
                 out.println(s);
                 recordsWritten++;
             }
-        } catch (FileNotFoundException nfe) { //PrintWriter exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (FileNotFoundException nf) { //PrintWriter exception 
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + nf.getMessage());
+        } catch (NullPointerException np) { 
+            throw new TextFileReadWriteException(np.getMessage());
+        } catch (IllegalArgumentException ia) { 
+            throw new TextFileReadWriteException(ia.getMessage());
         } catch (SecurityException se) { //PrintWriter exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
-        } catch (IOException ioe) { //FileWriter, BufferedWriter exception
-            errorMsg = FILE_ERR_MSG + fileName;
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + se.getMessage());
+        } catch (IOException io) { //FileWriter, BufferedWriter exception
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + io.getMessage());
         } finally {
-            out.close();
+            try {
+                inputFile.close();
+            } catch (IOException io) {
+                throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
+                        + fileName + io.getMessage());
+            }
         }
         return recordsWritten;
     }
 
     @Override
-    public int writeOne(List<LinkedHashMap<String, String>> records) {
+    public int writeOne(List<LinkedHashMap<String, String>> records) 
+            throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
         }
@@ -104,30 +119,33 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
                 out.println(s);
                 recordsWritten++;
             }
-        } catch (FileNotFoundException nfe) { //PrintWriter exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+        } catch (FileNotFoundException nf) { //PrintWriter exception 
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + nf.getMessage());
+        } catch (NullPointerException np) { 
+            throw new TextFileReadWriteException(np.getMessage());
+        } catch (IllegalArgumentException ia) { 
+            throw new TextFileReadWriteException(ia.getMessage());
         } catch (SecurityException se) { //PrintWriter exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
-        } catch (IOException ioe) { //FileWriter, BufferedWriter exception
-            errorMsg = FILE_ERR_MSG + fileName;
+            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
+                    + SPACE_STR + se.getMessage());
+        } catch (IOException io) { //FileWriter, BufferedWriter exception
+            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
+                    + SPACE_STR + io.getMessage());
         } finally {
-            out.close();
+            try {
+                inputFile.close();
+            } catch (IOException io) {
+                throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
+                        + fileName + io.getMessage());
+            }
         }
         return recordsWritten;
     }
 
-    private int closeFile() {
-        try {
-            inputFile.close();
-        } catch (IOException e) {
-            errorMsg = FILE_CLOSE_ERR_MSG + fileName;
-        }
-        return 0;
-    }
-
     @Override
-    public final void setFileName(File fileName) throws 
-            IllegalArgumentException, IOException{
+    public final void setFileName(File fileName)  
+            throws IllegalArgumentException, IOException{
         if (fileName == null) {
             throw new IllegalArgumentException(NO_FILE_NAME_MSG);
         }
@@ -146,8 +164,8 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return formatter;
     }
 
-    public final void setFormatter(TextFileFormatStrategy formatter) throws 
-            IllegalArgumentException {
+    public final void setFormatter(TextFileFormatStrategy formatter)  
+            throws IllegalArgumentException {
         if (formatter == null) {
             throw new IllegalArgumentException(NO_FORMAT_STRATEGY_MSG);
         }
@@ -182,7 +200,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
 
     @Override
     public String toString() {
-        return "TextFileWriteLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", hasHeader=" + hasHeader + ", errorMsg=" + errorMsg + '}';
+        return "TextFileWriteLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", hasHeader=" + hasHeader + '}';
     }
     
     public static void main(String[] args) {

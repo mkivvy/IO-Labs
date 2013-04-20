@@ -12,10 +12,10 @@ import java.util.List;
 public abstract interface TextFileReadStrategy {
     
     public abstract List<LinkedHashMap<String, String>> 
-            readAll(boolean hasHeader) throws TextFileReadException;
+            readAll(boolean hasHeader) throws TextFileReadWriteException;
     
     public abstract List<LinkedHashMap<String, String>> 
-            readOne(int recordNum) throws TextFileReadException;
+            readOne(int recordNum) throws TextFileReadWriteException;
     
     public abstract void setFileName(File fileName) throws 
             IllegalArgumentException, IOException;

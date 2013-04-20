@@ -1,6 +1,8 @@
 package lab4;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  *
@@ -8,30 +10,30 @@ import java.util.ArrayList;
  */
 public class FileService {
 
+    
     //note FileStrategys include fileName & TextFileFormatStrategy
-    public ArrayList<String[]> readAllTextFile(TextFileReadStrategy textFileRead) {
+    public List<LinkedHashMap<String, String>> readAllTextFile
+            (TextFileReadStrategy textFileRead, boolean hasHeader) {
         //validate input
-        return (textFileRead.readAll());
+        return (textFileRead.readAll(hasHeader));
     }
     
-    public String[] readOneTextFile(TextFileReadStrategy textFileRead, 
-            int recordNum) {
+    public List<LinkedHashMap<String, String>> readOneTextFile
+            (TextFileReadStrategy textFileRead, int recordNum) {
         //validate input
         return (textFileRead.readOne(recordNum));
     }
     
     public int writeAllTextFile(TextFileWriteStrategy textFileWrite,
-            ArrayList<String[]> records) {
+            List<LinkedHashMap<String, String>> records, boolean hasHeader) {
         //validate
-        textFileWrite.writeAll(records);
-        return 0;
+        return(textFileWrite.writeAll(records, hasHeader));
     }
 
     public int writeOneTextFile(TextFileWriteStrategy textFileWrite,
-            String[] recordFields) {
+            List<LinkedHashMap<String, String>> records) {
         //validate
-        textFileWrite.writeOne(recordFields);
-        return 0;
+        return(textFileWrite.writeOne(records));
     }
 
 }

@@ -9,12 +9,10 @@ import java.util.List;
  */
 public abstract interface TextFileFormatStrategy {
 
-    public abstract List<LinkedHashMap<String,String>> decodeRecord 
+    public abstract List<LinkedHashMap<String,String>> decodeRecords 
             (List<String> rawData, boolean hasHeader);
- //   public abstract String[] decodeRecord(String record);
-
-    public abstract List<String> encodeRecord
+ 
+    public abstract List<String> encodeRecords
             (List<LinkedHashMap<String,String>> records, boolean hasHeader);
-//    public abstract String encodeRecord(String[] fields);
     
 }

@@ -4,11 +4,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  *
@@ -18,7 +19,8 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     
     private File fileName;
     private BufferedReader inputFile = null;
-    private TextFileFormatStrategy formatter = new CSVPlusFormatter('^');
+    private TextFileFormatStrategy formatter;
+    private boolean hasHeader = false;
     private boolean fileExists = false;
     public static final int ZERO = 0;
     private String errorMsg;
@@ -37,17 +39,20 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     }
 
     @Override
-    public int writeAll(ArrayList<String[]> records) {
+    public int writeAll(List<LinkedHashMap<String, String>> records,
+            boolean hasHeader) {
+        List<String> encodedRecords = new ArrayList<String>();
         //if file exists, append; otherwise it is created
         boolean append = true;
         PrintWriter out = null;
+        int recordsWritten = 0;
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
-            String encodedRecord;
-            for (String[] sa : records) {
-                encodedRecord = formatter.encodeRecord(sa);
-                out.printf(encodedRecord);
+            encodedRecords = formatter.encodeRecords(records, hasHeader);
+            for (String s : encodedRecords) {
+                out.println(s);
+                recordsWritten++;
             }
         } catch (FileNotFoundException nfe) { //PrintWriter exception 
             errorMsg = FILE_NOT_FOUND_MSG + fileName;
@@ -62,19 +67,25 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
                 System.out.println(FILE_CLOSE_ERR_MSG);
             }
         }
-        return 0;
+        return recordsWritten;
     }
 
     @Override
-    public int writeOne(String[] recordFields) {
+    public int writeOne(List<LinkedHashMap<String, String>> records) {
+        List<String> encodedRecords = new ArrayList<String>();
+        hasHeader = false; //only writing one record, not header + record
         //if file exists, append; otherwise it is created
         boolean append = true;
         PrintWriter out = null;
+        int recordsWritten = 0;
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
-            String encodedRecord = formatter.encodeRecord(recordFields);
-            out.printf(encodedRecord);
+            encodedRecords = formatter.encodeRecords(records, hasHeader);
+            for (String s : encodedRecords) {
+                out.printf(s);
+                recordsWritten++;
+            }
         } catch (FileNotFoundException nfe) { //PrintWriter exception 
             errorMsg = FILE_NOT_FOUND_MSG + fileName;
         } catch (SecurityException se) { //PrintWriter exception 
@@ -84,11 +95,10 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         } finally {
             out.close();
         }
-        return 0;
+        return recordsWritten;
     }
 
-    @Override
-    public final int closeFile() {
+    private int closeFile() {
         try {
             inputFile.close();
         } catch (IOException e) {
@@ -123,5 +133,33 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     public final void setFormatter(TextFileFormatStrategy formatter) {
         //validate
         this.formatter = formatter;
+    }
+    public static void main(String[] args) {
+        File myFile = new File(File.separatorChar + "Users" 
+            + File.separatorChar + "Mary"
+            + File.separatorChar + "Documents"
+            + File.separatorChar + "AdvJavaCourse"
+            + File.separatorChar + "ContactList.txt");
+        
+        List<String> rawData = new ArrayList<String>();
+//        rawData.add("Total Fees,Total Hours" );
+//        rawData.add("21.65,34.50");
+//        rawData.add("44.0,66.0");
+        rawData.add("First Name#Last Name#Street Address#City#State#Zip#Email Address#Phone Nbr");
+        rawData.add("Ariana#Dancer#122 Spruce Lane#Glenwood#IL#60425#noticeme@gmail.com#708-555-1232");
+        rawData.add("Malaya#Science#1234 Wood Street#Griffith#IN#46309#giggles@yahoo.com#464-555-9875");
+        rawData.add("Nimbus#King#N74 W24450 Red Tail Court#Sussex#WI#53089#walkme@gmail.com#262-555-0317");
+        rawData.add("Hobbes#King#N74 W24450 Red Tail Court#Sussex#WI#53089#purrpurr@gmail.com#262-555-0701");
+        rawData.add("Laura#Strejcek#405 Walker Road#Normal#IL#60621#myweing@gmail.com#796-555-6752");
+        rawData.add("Deanna#Moore#431 Cortez Court#Naperville#IL#60789#ilovecats@gmail.com#708-555-6688");
+        CSVPlusFormatter csv = new CSVPlusFormatter(Delimiters.POUND_SIGN);
+        List<LinkedHashMap<String, String>> myMap =
+                csv.decodeRecords(rawData, true);
+        for (LinkedHashMap record : myMap) {
+            System.out.println(record);
+        }
+        TextFileWriteLines myWriter = new TextFileWriteLines(myFile, csv);
+        int i = myWriter.writeAll(myMap, true);
+        System.out.println(i + " records written");
     }
 }

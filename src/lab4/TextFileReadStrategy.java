@@ -1,7 +1,8 @@
 package lab4;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  *
@@ -9,11 +10,9 @@ import java.util.ArrayList;
  */
 public abstract interface TextFileReadStrategy {
     
-    public abstract ArrayList<String[]> readAll();
+    public abstract List<LinkedHashMap<String, String>> readAll(boolean hasHeader);
     
-    public abstract String[] readOne(int recordNum);
-    
-    public abstract int closeFile();
+    public abstract List<LinkedHashMap<String, String>> readOne(int recordNum);
     
     public abstract void setFileName(File fileName);
 }

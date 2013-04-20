@@ -45,23 +45,26 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private static final String FILE_ERR_MSG = "Cannot read file ";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
-    public TextFileReadLines(File fileName, TextFileFormatStrategy formatter) {
+    public TextFileReadLines(File fileName, TextFileFormatStrategy formatter) 
+            throws TextFileReadException {
         try {
             setFileName(fileName);
             setFormatter(formatter);
         } catch (IllegalArgumentException ia) {
-            errorMsg = ia.getMessage();
-        } catch (IOException e) {
-            errorMsg = e.getMessage();
+            throw new TextFileReadException(ia.getMessage());
+        } catch (IOException io) {
+            throw new TextFileReadException(io.getMessage());
         }
     }
 
     @Override
-    public final List<LinkedHashMap<String, String>> readAll(boolean hasHeader) {
+    public final List<LinkedHashMap<String, String>> readAll(boolean hasHeader) 
+            throws TextFileReadException {
         
         this.hasHeader = hasHeader;
         ArrayList<String> fileContents = new ArrayList<String>();
-        try {
+        
+        try { //this try block does the file processing
             inputFile = new BufferedReader(new FileReader(fileName));
             int lineCount = ZERO;
             String line = inputFile.readLine();
@@ -76,31 +79,46 @@ public class TextFileReadLines implements TextFileReadStrategy {
             if (lineCount == MAX_RECORDS) {
                 throw new LargeFileException(LARGE_FILE_MSG + fileName);
             }
-        } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
-            errorMsg = nre.getMessage();
-        } catch (IllegalArgumentException iae) { //BufferedReader exception
-            errorMsg = FILE_ERR_MSG + fileName;
-        } catch (FileNotFoundException nfe) { //FileReader exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
-        } catch (IOException ioe) { //BufferedReader read exception
-            errorMsg = FILE_ERR_MSG + fileName;
+        } catch (NoRecordException nr) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(nr.getMessage());
+        } catch (LargeFileException lf) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(lf.getMessage());
+        } catch (IllegalArgumentException ia) { //BufferedReader exception
+            throw new TextFileReadException(ia.getMessage());
+        } catch (FileNotFoundException nf) { //FileReader exception 
+            throw new TextFileReadException(FILE_NOT_FOUND_MSG + fileName);
+        } catch (IOException io) { //BufferedReader read exception
+            throw new TextFileReadException(FILE_ERR_MSG + fileName);
         } finally {
-            closeFile();
+            try {
+                inputFile.close();
+            } catch (IOException io) {
+                throw new TextFileReadException(FILE_CLOSE_ERR_MSG + fileName +
+                        io.getMessage());
+            }
         }
-        decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
+        try { //this try block does the post-read processing
+            decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
+        } catch (NullPointerException np) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(np.getMessage());
+        } catch (IllegalArgumentException ia) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(ia.getMessage());
+        }
         return decodedRecords;
     }
 
     @Override
-    public final List<LinkedHashMap<String, String>> readOne(int recordNum) {
+    public final List<LinkedHashMap<String, String>> readOne(int recordNum) 
+            throws TextFileReadException {
         
         if (recordNum < FIRST_RECORD) {
-            throw new IllegalArgumentException(RECORD_NUMBER_MSG);
+            throw new TextFileReadException(RECORD_NUMBER_MSG);
         }
         hasHeader = false; //only reading 1 record & not including header
         ArrayList<String> fileContents = new ArrayList<String>();
         String line = null;
-        try {
+        
+        try { //this try block does the file processing
             inputFile = new BufferedReader(new FileReader(fileName));
             line = inputFile.readLine();
             if (line == null) {
@@ -117,35 +135,36 @@ public class TextFileReadLines implements TextFileReadStrategy {
             }
 
         } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
-            errorMsg = nre.getMessage();
-        } catch (IllegalArgumentException iae) { //BufferedReader exception
-            errorMsg = FILE_ERR_MSG + fileName;
+            throw new TextFileReadException(nre.getMessage());
+        } catch (IllegalArgumentException ia) { //BufferedReader exception
+            throw new TextFileReadException(ia.getMessage());
         } catch (FileNotFoundException nfe) { //FileReader exception 
-            errorMsg = FILE_NOT_FOUND_MSG + fileName;
+            throw new TextFileReadException(FILE_NOT_FOUND_MSG + fileName);
         } catch (IOException ioe) { //BufferedReader read exception
-            errorMsg = FILE_ERR_MSG + fileName;
+            throw new TextFileReadException(FILE_ERR_MSG + fileName);
         } finally {
-            closeFile();
+            try {
+                inputFile.close();
+            } catch (IOException io) {
+                throw new TextFileReadException(FILE_CLOSE_ERR_MSG + fileName +
+                        io.getMessage());
+            }
         }
-        try {
-            if (line == null) {
+        
+        try { //this try block does the post-read processing
+            if (line == null) { //requested record was not found
                 throw new NoRecordException(NO_RECORD_FOUND_MSG + fileName);
             }
+            fileContents.add(line);
+            decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
         } catch (NoRecordException nre) { //Custom - Invalid Parm/IllegalArg
-            errorMsg = nre.getMessage();
+            throw new TextFileReadException(nre.getMessage());
+        } catch (NullPointerException np) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(np.getMessage());
+        } catch (IllegalArgumentException ia) { //Custom - Invalid Parm/IllegalArg
+            throw new TextFileReadException(ia.getMessage());
         }
-        fileContents.add(line);
-        decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
         return decodedRecords;
-    }
-
-    private int closeFile() {
-        try {
-            inputFile.close();
-        } catch (IOException e) {
-            errorMsg = FILE_CLOSE_ERR_MSG + fileName;
-        }
-        return 0;
     }
 
     @Override

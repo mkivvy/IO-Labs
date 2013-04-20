@@ -31,10 +31,10 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
             (List<String> rawData, boolean hasHeader) 
             throws NullPointerException, IllegalArgumentException {
         if (rawData == null) {
-            throw new NullPointerException(NO_RECORDS_DECODE_MSG );
+            throw new NullPointerException(NO_RECORDS_DECODE_MSG);
         }
         if (rawData.isEmpty()) {
-            throw new IllegalArgumentException(NO_RECORDS_DECODE_MSG );
+            throw new IllegalArgumentException(NO_RECORDS_DECODE_MSG);
         }
 
         //First, create an arraylist of linkedhashmaps to be returned to caller
@@ -85,10 +85,10 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
             (List<LinkedHashMap<String, String>> records, boolean hasHeader) 
             throws NullPointerException, IllegalArgumentException {
         if (records == null) {
-            throw new NullPointerException(NO_RECORDS_ENCODE_MSG );
+            throw new NullPointerException(NO_RECORDS_ENCODE_MSG);
         }
         if (records.isEmpty()) {
-            throw new IllegalArgumentException(NO_RECORDS_ENCODE_MSG );
+            throw new IllegalArgumentException(NO_RECORDS_ENCODE_MSG);
         }
         //initialize output, an array of Strings ready to be written
         List<String> encodedData = new ArrayList<String>();

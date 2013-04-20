@@ -14,10 +14,23 @@ public class ListAndLinkedHashMapConverter {
     public static final int ONE = 1;
     public static final int FIRST = 1;
     public static final String DOUBLE_BACKSLASH = "\\";
+    public static final String NO_MAP_RECORDS_MSG 
+            = "There are no map records to convert to list.";
+    public static final String NO_LIST_RECORDS_MSG 
+            = "There are no list records to convert to map.";
+
 
     public final List<String> convertMapToList
             (List<LinkedHashMap<String, String>> map, Delimiters delim,
-            boolean hasHeader) {
+            boolean hasHeader) 
+            throws NullPointerException, IllegalArgumentException {
+        if (map == null) {
+            throw new NullPointerException(NO_MAP_RECORDS_MSG);
+        }
+        if (map.isEmpty()) {
+            throw new IllegalArgumentException(NO_MAP_RECORDS_MSG);
+        }
+        
         char delimChar = delim.getValue();
         List<String> listData = new ArrayList<String>();
         Set<String> keys = null;
@@ -60,8 +73,16 @@ public class ListAndLinkedHashMapConverter {
     }
 
     public final List<LinkedHashMap<String, String>> convertListToMap
-            (List<String> listData, Delimiters delim, boolean hasHeader) {
+            (List<String> listData, Delimiters delim, boolean hasHeader) 
+            throws NullPointerException, IllegalArgumentException {
         
+        if (listData == null) {
+            throw new NullPointerException(NO_LIST_RECORDS_MSG);
+        }
+        if (listData.isEmpty()) {
+            throw new IllegalArgumentException(NO_LIST_RECORDS_MSG);
+        }
+
         String delimiterStr = DOUBLE_BACKSLASH + delim.getValue();
         
         //arraylist of linkedhashmaps to be returned 

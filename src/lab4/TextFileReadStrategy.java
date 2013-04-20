@@ -11,9 +11,11 @@ import java.util.List;
  */
 public abstract interface TextFileReadStrategy {
     
-    public abstract List<LinkedHashMap<String, String>> readAll(boolean hasHeader);
+    public abstract List<LinkedHashMap<String, String>> 
+            readAll(boolean hasHeader) throws TextFileReadException;
     
-    public abstract List<LinkedHashMap<String, String>> readOne(int recordNum);
+    public abstract List<LinkedHashMap<String, String>> 
+            readOne(int recordNum) throws TextFileReadException;
     
     public abstract void setFileName(File fileName) throws 
             IllegalArgumentException, IOException;

@@ -6,9 +6,22 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author Mary
- */
+ * ListAndLinkedHashMapConverter converts a List of LinkedHashMaps into a
+ * List of Strings and converts a List of Strings into a List of LinkedHashMaps.
+ * This class can be used to prepare data to be used in conjunction with 
+ * reading and writing text files using the TextFileReadStrategy and 
+ * TextFileWriteStartaegy.
+ * <p>
+ * The method convertMapToList converts a List of LinkedHashMaps into a List of 
+ * Strings containing records separated by the delimiter.
+ * <p>
+ * The method convertListToMap uses the delimiter to convert a List of Strings 
+ * into a List of LinkedHashMaps containing a key field and value field in each
+ * record in the map. 
+ * 
+ * @author Mary King, mking@my.wctc.edu
+ * @version 1.0
+*/
 public class ListAndLinkedHashMapConverter {
     public static final int ZERO = 0;
     public static final int ONE = 1;
@@ -19,7 +32,25 @@ public class ListAndLinkedHashMapConverter {
     public static final String NO_LIST_RECORDS_MSG 
             = "There are no list records to convert to map.";
 
-
+    /**
+     * This method converts a List of LinkedHashMaps (map) into a List of
+     * Strings (listData).  This method also uses the Enum class delimiter 
+     * (delim) passed in as the character included between each of the field 
+     * values for each String returned.  If the input data contains header 
+     * information as the key values, a header record is created as the first 
+     * record in the returned List.
+     * 
+     * @param map a List of LinkedHashMaps containing record data, may or
+     * may not include header information, not null, not empty
+     * @param delim of type Delimiters specifying the character used as the
+     * record separator
+     * @param hasHeader boolean indicating whether the input List of 
+     * LinkedHashMaps contains header information in the key fields
+     * @return a List of Strings containing data separated by the specified
+     * delimiter character
+     * @throws NullPointerException if input map is null
+     * @throws IllegalArgumentException if input map is empty
+     */
     public final List<String> convertMapToList
             (List<LinkedHashMap<String, String>> map, Delimiters delim,
             boolean hasHeader) 
@@ -72,6 +103,26 @@ public class ListAndLinkedHashMapConverter {
         return listData;
     }
 
+    /**
+     * This method converts a List of Strings (listData) into a List of 
+     * LinkedHashMaps (mapData) containing a key field and value field in 
+     * each record in the map.  If the input data does not contain a header
+     * record, integers starting at zero are used as the record keys.  This
+     * method also uses the Enum class delimiter (delim) passed in to split
+     * the Strings of listData into fields for the returned mapData.
+     * 
+     * @param listData a List of Strings containing data separated by the
+     * specified delimiter, not null, not empty
+     * @param delim of type Delimiters specifying the character used as the
+     * record separator
+     * @param hasHeader boolean indicating whether the input List of Strings
+     * contains a header String as the first String
+     * @return a List of LinkedHashMaps containing a key field and value field 
+     * in each record in the map.  If there is no header, integer values 
+     * starting at zero are used for the key values.
+     * @throws NullPointerException if input listData is null
+     * @throws IllegalArgumentException if input listData is empty
+     */
     public final List<LinkedHashMap<String, String>> convertListToMap
             (List<String> listData, Delimiters delim, boolean hasHeader) 
             throws NullPointerException, IllegalArgumentException {

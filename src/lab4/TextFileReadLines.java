@@ -11,8 +11,26 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author Mary
+ * TextFileReadLines uses the TextFileReadStrategy interface to read records
+ * in the specified file.
+ * It also contains a TextFileFormatStrategy which is used to decode the
+ * records.
+ * The decoded set of records are returned to the calling class.
+ * <p>
+ * The method readAll reads all the records in the specified file, decodes them,
+ * and then returns them to the calling class.
+ * If the boolean hasHeader indicates the file contains a header record as the
+ * first record, the values are used as keys for the List of LinkedHashMaps
+ * that is returned.
+ * <p>
+ * The method readOne reads the records in the specified file until it reaches
+ * the record number specified. It then decode this record and returns it to 
+ * the calling class as the only map in a List of LinkedHashMaps.
+ * This map contains arbitrary values in the key fields in the map as only
+ * the one record is handled (not the specified record plus the header record).
+ * 
+ * @author Mary King, mking@my.wctc.edu
+ * @version 1.0
  */
 public class TextFileReadLines implements TextFileReadStrategy {
     
@@ -44,7 +62,16 @@ public class TextFileReadLines implements TextFileReadStrategy {
     private static final String FILE_NOT_FOUND_MSG = "File not found: ";
     private static final String FILE_ERR_MSG = "Cannot read file ";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
-
+    
+    /**
+     * Constructor instantiates the class setting the file name and the
+     * TextFileFormatStrategy.
+     *
+     * @param fileName name of the file to be read, not null, not empty
+     * @param formatter name of the TextFileFormatStrategy to be used in 
+     * decoding the file records
+     * @throws TextFileReadWriteException if file name or formatter is not valid
+     */
     public TextFileReadLines(File fileName, TextFileFormatStrategy formatter) 
             throws TextFileReadWriteException {
         try {
@@ -57,6 +84,25 @@ public class TextFileReadLines implements TextFileReadStrategy {
         }
     }
 
+    /**
+     * This method reads all the records in a specified file and stores them in
+     * an ArrayList of Strings.  It then passes this List into the TextFile-
+     * FormatStrategy's decodeRecords method which converts the List of 
+     * Strings into a List of LinkedHashMaps.  Each map in the list contains
+     * records containing a value field with the fields values from the file and
+     * a key field.   The key field value contains a header field value if a 
+     * header record exists, otherwise it contains an arbitrary value.  This
+     * List of LinkedHashMaps is returned to the caller. 
+     * 
+     * @param hasHeader boolean indicating whether the file to be read contains
+     * a header record as the first record
+     * @return a List of LinkedHashMaps containing a key field and value field 
+     * in each record in the map.  If there is no header, integer values 
+     * starting at zero are used for the key values.
+     * @throws TextFileReadWriteException if no records are retrieved, the
+     * file being read contains more than the maximum allowable number of
+     * records, the file is not found or there is some other file error.
+     */
     @Override
     public final List<LinkedHashMap<String, String>> readAll(boolean hasHeader) 
             throws TextFileReadWriteException {
@@ -110,6 +156,24 @@ public class TextFileReadLines implements TextFileReadStrategy {
         return decodedRecords;
     }
 
+    /**
+     * This method reads the specified file until it reads the requested record
+     * number.  It stores the values for this record in a String contained
+     * in an ArrayList to pass into the TextFileFormatStrategy's decodeRecords 
+     * method. It is converted into a LinkedHashMap which is part of a List. 
+     * The map contains the record values in the value fields of the map and 
+     * an arbitrary value in each key field since a header record is not sent.
+     * The List of LinkedHashMaps (with the one map) is returned to the caller. 
+     * 
+     * @param recordNum the number of the record to be returned to the caller,
+     * not less than 1
+     * @return a List of LinkedHashMaps containing a key field and value field 
+     * for the requested file record.  An arbitrary value is assigned to the 
+     * key values since a header record is not being read.
+     * @throws TextFileReadWriteException if the requested record number is less
+     * than 1, the requested record is not found, the file is not found or there 
+     * is some other file error.
+     */
     @Override
     public final List<LinkedHashMap<String, String>> readOne(int recordNum) 
             throws TextFileReadWriteException {
@@ -173,10 +237,28 @@ public class TextFileReadLines implements TextFileReadStrategy {
         return decodedRecords;
     }
 
+    /**
+     * Returns the value of the private variable fileName.
+     * 
+     * @return the name of the file to be read
+     */
+    public final File getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Sets the value of the private variable fileName, to be used for reading, 
+     * with the name of the file passed as input.
+     *
+     * @param fileName name of file to be read, not null, not empty 
+     * @throws IllegalArgumentException if fileName is null
+     * @throws IOException if the file does not exist, is not of type File, or 
+     * cannot be read
+     */
     @Override
     public final void setFileName(File fileName) throws 
             IllegalArgumentException, IOException {
-        if (fileName == null) {
+        if ((fileName == null) || (fileName.length() == ZERO)) {
             throw new IllegalArgumentException(NO_FILE_NAME_MSG);
         }
         if (!(fileName.exists())) {
@@ -192,10 +274,24 @@ public class TextFileReadLines implements TextFileReadStrategy {
         this.fileName = fileName;
     }
 
+    /**
+     * Returns the value of the private variable for the TextFileFormatStrategy 
+     * to be used in decoding file data in the previously specified file.
+     * 
+     * @return the TextFileFormatStrategy to be used in reading file data
+     */
     public final TextFileFormatStrategy getFormatter() {
         return formatter;
     }
 
+    /**
+     * Sets the value of the private variable for the TextFileFormatStrategy 
+     * to be used in decoding file data in the previously specified file.
+     *
+     * @param formatter the formatting strategy to be used for reading from the
+     * previously specified file
+     * @throws IllegalArgumentException if the TextFileFormatStrategy is null
+     */
     public final void setFormatter(TextFileFormatStrategy formatter) throws
             IllegalArgumentException {
         if (formatter == null) {
@@ -204,6 +300,12 @@ public class TextFileReadLines implements TextFileReadStrategy {
         this.formatter = formatter;
     }
 
+    /**
+     * Calculates the hashCode for the class using the fileName, formatter, 
+     * decodedRecords, and hasHeader fields.
+     *
+     * @return the hashCode
+     */
     @Override
     public int hashCode() {
         int hash = 3;
@@ -214,6 +316,13 @@ public class TextFileReadLines implements TextFileReadStrategy {
         return hash;
     }
 
+    /**
+     * Determines if two TextFileReadLines objects are equal based on the
+     * fields fileName, formatter, decodedRecords, and hasHeader.
+     *
+     * @param obj Object of type TextFileReadLines, not null
+     * @return true if the objects are equal, false if the objects are unequal
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -238,6 +347,13 @@ public class TextFileReadLines implements TextFileReadStrategy {
         return true;
     }
 
+    /**
+     * Returns a String object containing the values of the private fields
+     * of the TextFileReadLines class - fileName, formatter, decodedRecords,
+     * and hasHeader.
+     *
+     * @return a String containing the values of the private fields of the class
+     */
     @Override
     public String toString() {
         return "TextFileReadLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", decodedRecords=" + decodedRecords + ", hasHeader=" + hasHeader + '}';

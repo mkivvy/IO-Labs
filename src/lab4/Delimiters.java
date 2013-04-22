@@ -1,8 +1,12 @@
 package lab4;
 
 /**
- *
- * @author Mary
+ * Delimiters is the enum class containing acceptable values for using the 
+ * CSVPlusFormatter class.
+ * The character value of the enum can be retrieved using the method getValue().
+ * 
+ * @author Mary King, mking@my.wctc.edu
+ * @version 1.0
  */
 public enum Delimiters {
     TAB('\t'),
@@ -33,7 +37,12 @@ public enum Delimiters {
         this.value = value;
     }
     
-    public char getValue() {
+    /**
+     * Returns the character value of the enum name.
+     * 
+     * @return the character value assigned to the enum name
+     */
+    public final char getValue() {
         return value;
     }
 }

@@ -12,8 +12,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
- *
- * @author Mary
+ * TextFileWriteLines uses the TextFileWriteStrategy interface to write records
+ * to the specified file.
+ * It also contains a TextFileFormatStrategy which is used to encode the
+ * records to be written.
+ * The number of records written is returned to the calling class.
+ * <p>
+ * The method writeAll takes all the records passed in, encodes them, and then
+ * writes them all out to the specified file.
+ * <p>
+ * The method writeOne takes the one record passed in, encodes it, and then
+ * writes it out to the specified file.
+ * 
+ * @author Mary King, mking@my.wctc.edu
+ * @version 1.0
  */
 public class TextFileWriteLines implements TextFileWriteStrategy {
     
@@ -35,6 +47,15 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
     private static final String FILE_ERR_MSG = "Cannot read file ";
     private static final String FILE_CLOSE_ERR_MSG = "Error closing file ";
 
+    /**
+     * Constructor instantiates the class setting the file name and the
+     * TextFileFormatStrategy.
+     *
+     * @param fileName name of the file to be written to, not null, not empty
+     * @param formatter name of the TextFileFormatStrategy to be used in 
+     * encoding the file records
+     * @throws TextFileReadWriteException if file name or formatter is not valid
+     */
     public TextFileWriteLines(File fileName, TextFileFormatStrategy formatter) 
             throws TextFileReadWriteException {
         try {
@@ -47,8 +68,22 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         }
     }
 
+    /**
+     * This method writes all the records passed in as a List of LinkedHashMaps
+     * to the previously specified text file.
+     * It uses the previously specified TextFileFormatStrategy to encode the
+     * records of the input and then writes them out to the file.
+     * 
+     * @param records is a List of LinkedHashMaps containing record data to be
+     * written to a text file, not null, not empty
+     * @param hasHeader boolean indicating whether the input data contains
+     * header information
+     * @return the number of records written to the file, expressed as an int
+     * @throws TextFileReadWriteException if input List is null or empty, the 
+     * file is not found, or there is some other file write error
+     */
     @Override
-    public int writeAll(List<LinkedHashMap<String, String>> records,
+    public final int writeAll(List<LinkedHashMap<String, String>> records,
             boolean hasHeader) throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
@@ -95,8 +130,20 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return recordsWritten;
     }
 
+    /**
+     * This method writes the one record passed in as a List of LinkedHashMaps
+     * to the previously specified text file.
+     * It uses the previously specified TextFileFormatStrategy to encode the
+     * record of the input and then writes it out to the file.
+     * 
+     * @param records is a List of LinkedHashMaps containing record data to be
+     * written to a text file, not null, not empty
+     * @return the number of records written to the file, expressed as an int
+     * @throws TextFileReadWriteException if input List is null or empty, the 
+     * file is not found, or there is some other file write error
+     */
     @Override
-    public int writeOne(List<LinkedHashMap<String, String>> records) 
+    public final int writeOne(List<LinkedHashMap<String, String>> records) 
             throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
@@ -143,6 +190,24 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return recordsWritten;
     }
 
+    /**
+     * Returns the value of the private variable fileName.
+     * 
+     * @return the name of the file to be read
+     */
+    public final File getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Sets the value of the file name to be written to with the name of the 
+     * file passed as input.
+     *
+     * @param fileName name of file to be written to, not null, not empty 
+     * @throws IllegalArgumentException if fileName is null
+     * @throws IOException if the file is not of type File or cannot be 
+     * written to 
+     */
     @Override
     public final void setFileName(File fileName)  
             throws IllegalArgumentException, IOException{
@@ -160,10 +225,24 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         this.fileName = fileName;
     }
 
+    /**
+     * Returns the value of the private variable for the TextFileFormatStrategy 
+     * to be used in encoding data for the previously specified file.
+     * 
+     * @return the TextFileFormatStrategy to be used in writing the file data
+     */
     public final TextFileFormatStrategy getFormatter() {
         return formatter;
     }
 
+    /**
+     * Sets the value of the private variable for the TextFileFormatStrategy 
+     * to be used in encoding data for the previously specified file.
+     *
+     * @param formatter the formatting strategy to be used for writing to the
+     * previously specified file
+     * @throws IllegalArgumentException if the TextFileFormatStrategy is null
+     */
     public final void setFormatter(TextFileFormatStrategy formatter)  
             throws IllegalArgumentException {
         if (formatter == null) {
@@ -172,6 +251,12 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         this.formatter = formatter;
     }
 
+    /**
+     * Calculates the hashCode for the class using the fileName, formatter, 
+     * and hasHeader fields.
+     *
+     * @return the hashCode
+     */
     @Override
     public int hashCode() {
         int hash = 7;
@@ -180,6 +265,13 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return hash;
     }
 
+    /**
+     * Determines if two TextFileWriteLines objects are equal based on the
+     * fields fileName, formatter and hasHeader.
+     *
+     * @param obj Object of type TextFileWriteLines, not null
+     * @return true if the objects are equal, false if the objects are unequal
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -198,6 +290,12 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         return true;
     }
 
+    /**
+     * Returns a String object containing the values of the private fields
+     * of the TextFileWriteLines class - fileName, formatter and hasHeader.
+     *
+     * @return a String containing the values of the private fields of the class
+     */
     @Override
     public String toString() {
         return "TextFileWriteLines{" + "fileName=" + fileName + ", formatter=" + formatter + ", hasHeader=" + hasHeader + '}';

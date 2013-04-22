@@ -6,9 +6,24 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author Mary
- */
+ * CSVPlusFormatter uses the TextFileFormatStrategy interface to handle the
+ * encoding and decoding of formatted records using a character delimiter.
+ * The valid delimiter characters are specified in the Enum class Delimiters.
+ * In addition to the widely used comma and tab characters, Delimiters
+ * contains other characters that my be used to separate record fields.
+ * <p>
+ * The Enum class delimiter is passed in at instantiation.
+ * <p>
+ * The method decodeRecords uses the delimiter to convert a List of Strings into 
+ * a List of LinkedHashMaps containing a key field and value field in each
+ * record in the map. 
+ * <p>
+ * The method encodeRecords converts a List of LinkedHashMaps into a List of 
+ * Strings containing records separated by the delimiter.
+ * 
+ * @author Mary King, mking@my.wctc.edu
+ * @version 1.0
+*/
 public class CSVPlusFormatter implements TextFileFormatStrategy {
 
     private char delimiterChar;
@@ -21,13 +36,37 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
             = "There are no records to decode.";
     public static final String NO_RECORDS_ENCODE_MSG 
             = "There are no records to encode.";
-
+    /**
+     * Constructor instantiates the class setting the delimiter character and
+     * delimiter String used for formatting.
+     *
+     * @param delimiter of type Delimiters specifying the character used as the
+     * record separator
+     */
     public CSVPlusFormatter(Delimiters delimiter) {
         setDelimiters(delimiter);
     }
 
+    /**
+     * This method converts a List of Strings (rawData) into a List of 
+     * LinkedHashMaps (decodedData) containing a key field and value field in 
+     * each record in the map.  If the input data does not contain a header
+     * record, integers starting at zero are used as the record keys.  This
+     * method uses the String delimiter set during instantiation to separate
+     * the rawData into fields for the returned map.
+     * 
+     * @param rawData a List of Strings containing record data separated by
+     * a previously specified delimiter character, not null, not empty
+     * @param hasHeader boolean indicating whether the input List of Strings
+     * contains a header record as the first record
+     * @return a List of LinkedHashMaps containing a key field and value field 
+     * in each record in the map.  If there is no header, integer values 
+     * starting at zero are used for the key values.
+     * @throws NullPointerException if input rawData is null
+     * @throws IllegalArgumentException if input rawData is empty
+     */
     @Override
-    public List<LinkedHashMap<String, String>> decodeRecords
+    public final List<LinkedHashMap<String, String>> decodeRecords
             (List<String> rawData, boolean hasHeader) 
             throws NullPointerException, IllegalArgumentException {
         if (rawData == null) {
@@ -80,6 +119,23 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
         return decodedData;
     }
 
+    /**
+     * This method converts a List of LinkedHashMaps (records) into a List of
+     * Strings (encodedData).  The delimiter character specified at 
+     * instantiation is used between each of the record values for each String 
+     * returned.  If the input data contains header information as the key 
+     * values, a header record is created as the first record in the returned
+     * List.
+     * 
+     * @param records a List of LinkedHashMaps containing record data, may or
+     * may not include header information, not null, not empty
+     * @param hasHeader boolean indicating whether the input List of 
+     * LinkedHashMaps contains header information in the key fields
+     * @return a List of Strings containing record data separated by the
+     * previously specified delimiter character
+     * @throws NullPointerException if input records is null
+     * @throws IllegalArgumentException if input records is empty
+     */
     @Override
     public final List<String> encodeRecords
             (List<LinkedHashMap<String, String>> records, boolean hasHeader) 
@@ -136,30 +192,60 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
         return encodedData;
     }
 
+    /**
+     * Returns the value for the private field delimiterChar used for encoding.
+     *
+     * @return the value for the private field delimiterChar
+     */
     public final char getDelimiterChar() {
         return delimiterChar;
     }
 
+    /**
+     * Returns the value for the private field delimiterStr used for decoding.
+     *
+     * @return the value for the private field delimiterStr
+     */
     public final String getDelimiterStr() {
         return delimiterStr;
     }
 
+    /**
+     * Sets the value of the private variables delimiterChar and delimiterStr
+     * based on the Enum type passed in.  The character version of the delimiter
+     * is used for encoding and the String version is used for decoding.
+     * 
+     * @param delimiter the Enum type character used for formatting
+     */
     public final void setDelimiters(Delimiters delimiter) {
         delimiterChar = delimiter.getValue();
         delimiterStr = DOUBLE_BACKSLASH + delimiterChar;
 //        System.out.printf("char=%c  string =%s", delimiterChar, delimiterStr);
     }
 
+    /**
+     * Calculates the hashCode for the class using the delimiterChar and 
+     * delimiterStr fields.
+     *
+     * @return the hashCode
+     */
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         int hash = 5;
         hash = 47 * hash + this.delimiterChar;
         hash = 47 * hash + (this.delimiterStr != null ? this.delimiterStr.hashCode() : 0);
         return hash;
     }
 
+    /**
+     * Determines if two CSVPlusFormatter objects are equal based on the
+     * fields delimiterChar and delimiterStr.
+     *
+     * @param obj Object of type CSVPlusFormatter, not null
+     * @return true if the objects are equal, false if the objects are unequal
+     */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
@@ -176,8 +262,15 @@ public class CSVPlusFormatter implements TextFileFormatStrategy {
         return true;
     }
 
+    /**
+     * Returns a String object containing the values of all the private fields
+     * of the CSVPlusFormatter class - delimiterChar and delimiterStr.
+     *
+     * @return a String containing the values of all the private fields of the
+     * class
+     */
     @Override
-    public String toString() {
+    public final String toString() {
         return "CSVPlusFormatter{" + "delimiterChar=" + delimiterChar + ", delimiterStr=" + delimiterStr + '}';
     }
 

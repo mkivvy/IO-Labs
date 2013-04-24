@@ -14,7 +14,7 @@ import java.util.List;
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
  */
-public abstract interface TextFileFormatStrategy {
+public abstract interface TextFileFormatStrategy<T,E> {
 
     /**
      * This method converts a List of Strings (rawData) into a List of 
@@ -31,8 +31,7 @@ public abstract interface TextFileFormatStrategy {
      * @throws NullPointerException if input rawData is null
      * @throws IllegalArgumentException if input rawData is empty
      */
-    public abstract List<LinkedHashMap<String,String>> decodeRecords 
-            (List<String> rawData, boolean hasHeader)
+    public abstract T decodeRecords (E rawData, boolean hasHeader)
             throws NullPointerException, IllegalArgumentException;
  
     /**
@@ -49,8 +48,7 @@ public abstract interface TextFileFormatStrategy {
      * @throws NullPointerException if input records is null
      * @throws IllegalArgumentException if input records is empty
      */
-    public abstract List<String> encodeRecords
-            (List<LinkedHashMap<String,String>> records, boolean hasHeader)
+    public abstract List<String> encodeRecords (T records, boolean hasHeader)
             throws NullPointerException, IllegalArgumentException;
     
 }

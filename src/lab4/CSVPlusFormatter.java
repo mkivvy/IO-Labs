@@ -24,7 +24,8 @@ import java.util.Set;
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
 */
-public class CSVPlusFormatter implements TextFileFormatStrategy {
+public class CSVPlusFormatter implements 
+        TextFileFormatStrategy<List<LinkedHashMap<String, String>>,List<String>>{
 
     private char delimiterChar;
     private String delimiterStr;

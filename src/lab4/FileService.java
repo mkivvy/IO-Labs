@@ -60,7 +60,8 @@ public class FileService {
         }
         try {
             List<LinkedHashMap<String, String>> readAllMap
-                    = textFileRead.readAll(hasHeader);
+                    = (List<LinkedHashMap<String, String>>) 
+                    textFileRead.readAll(hasHeader);
             return (readAllMap);
         } catch (TextFileReadWriteException tfr) {
             throw new TextFileReadWriteException(tfr.getMessage());
@@ -96,7 +97,8 @@ public class FileService {
         }
         try {
             List<LinkedHashMap<String, String>> readOneMap
-                    = textFileRead.readOne(recordNum);
+                    = (List<LinkedHashMap<String, String>>) 
+                    textFileRead.readOne(recordNum);
             return (readOneMap);
         } catch (TextFileReadWriteException tfr) {
             throw new TextFileReadWriteException(tfr.getMessage());

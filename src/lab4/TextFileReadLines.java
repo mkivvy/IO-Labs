@@ -32,7 +32,8 @@ import java.util.Set;
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
  */
-public class TextFileReadLines implements TextFileReadStrategy {
+public class TextFileReadLines implements 
+        TextFileReadStrategy<List<LinkedHashMap<String, String>>> {
     
     private File fileName;
     private BufferedReader inputFile = null;
@@ -147,7 +148,10 @@ public class TextFileReadLines implements TextFileReadStrategy {
             }
         }
         try { //this try block does the post-read processing
-            decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
+            //casting must be done because the return type is specified as
+            //the generic T in the TextFileFormatStrategy
+            decodedRecords = (List<LinkedHashMap<String, String>>) 
+                    formatter.decodeRecords(fileContents, hasHeader);
         } catch (NullPointerException np) { 
             throw new TextFileReadWriteException(np.getMessage());
         } catch (IllegalArgumentException ia) { 
@@ -226,7 +230,10 @@ public class TextFileReadLines implements TextFileReadStrategy {
                 throw new NoRecordException(NO_RECORD_FOUND_MSG + fileName);
             }
             fileContents.add(line);
-            decodedRecords = formatter.decodeRecords(fileContents, hasHeader);
+            //casting must be done because the return type is specified as
+            //the generic T in the TextFileFormatStrategy
+            decodedRecords = (List<LinkedHashMap<String, String>>) 
+                    formatter.decodeRecords(fileContents, hasHeader);
         } catch (NoRecordException nr) { //Custom - Invalid Parm/IllegalArg
             throw new TextFileReadWriteException(nr.getMessage());
         } catch (NullPointerException np) { 
@@ -242,6 +249,7 @@ public class TextFileReadLines implements TextFileReadStrategy {
      * 
      * @return the name of the file to be read
      */
+    @Override
     public final File getFileName() {
         return fileName;
     }
@@ -280,6 +288,7 @@ public class TextFileReadLines implements TextFileReadStrategy {
      * 
      * @return the TextFileFormatStrategy to be used in reading file data
      */
+    @Override
     public final TextFileFormatStrategy getFormatter() {
         return formatter;
     }
@@ -289,9 +298,10 @@ public class TextFileReadLines implements TextFileReadStrategy {
      * to be used in decoding file data in the previously specified file.
      *
      * @param formatter the formatting strategy to be used for reading from the
-     * previously specified file
+     * previously specified file, not null
      * @throws IllegalArgumentException if the TextFileFormatStrategy is null
      */
+    @Override
     public final void setFormatter(TextFileFormatStrategy formatter) throws
             IllegalArgumentException {
         if (formatter == null) {

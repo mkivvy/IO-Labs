@@ -37,6 +37,7 @@ public class FileService {
             + "strategy was specified.  A valid text file write is required.";
     private static final String NO_RECORDS_TO_WRITE_MSG = 
             "The input contains no records to be written.";
+    
     /**
      * This method reads all the records in a text file and returns the values 
      * for the records in a List of LinkedHashMaps.
@@ -116,13 +117,12 @@ public class FileService {
      * written to a text file, not null, not empty
      * @param hasHeader boolean indicating whether the input data contains
      * header information
-     * @return the number of records written to the file, expressed as an int
      * @throws IllegalArgumentException if input List is null or empty or the 
      * TextFileWriteStrategy is null
      * @throws TextFileReadWriteException if there is an exception during the
      * running of the TextFileWriteStrategy's writeAll method
      */
-    public final int writeAllTextFile(TextFileWriteStrategy textFileWrite,
+    public final void writeTextFile(TextFileWriteStrategy textFileWrite,
             List<LinkedHashMap<String, String>> records, boolean hasHeader)  
             throws IllegalArgumentException, TextFileReadWriteException {
         if (textFileWrite == null) {
@@ -132,44 +132,11 @@ public class FileService {
             throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
         }
         try {
-            int i = textFileWrite.writeAll(records, hasHeader);
-            return i;
+            textFileWrite.writeRecords(records, hasHeader);
         } catch (TextFileReadWriteException tfw) {
             throw new TextFileReadWriteException(tfw.getMessage());
         }
 //        return(textFileWrite.writeAll(records, hasHeader));
-    }
-
-    /**
-     * This method writes the one record passed in as a List of LinkedHashMaps
-     * to a text file using the TextFileWriteStrategy specified.
-     * 
-     * @param textFileWrite name of the TextFileWriteStrategy to be used in 
-     * writing the record to the file
-     * @param records is a List of LinkedHashMaps containing record data to be
-     * written to a text file, not null, not empty
-     * @return the number of records written to the file, expressed as an int
-     * @throws IllegalArgumentException if input List is null or empty or the 
-     * TextFileWriteStrategy is null
-     * @throws TextFileReadWriteException if there is an exception during the
-     * running of the TextFileWriteStrategy's writeOne method
-     */
-    public final int writeOneTextFile(TextFileWriteStrategy textFileWrite,
-            List<LinkedHashMap<String, String>> records) 
-            throws IllegalArgumentException, TextFileReadWriteException {
-        if (textFileWrite == null) {
-            throw new IllegalArgumentException(NO_WRITE_STRATEGY_MSG);
-        }
-        if ((records == null) || (records.isEmpty())) {
-            throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
-        }
-        try {
-            int i = textFileWrite.writeOne(records);
-            return i;
-        } catch (TextFileReadWriteException tfw) {
-            throw new TextFileReadWriteException(tfw.getMessage());
-        }
-//        return(textFileWrite.writeOne(records));
     }
 
 }

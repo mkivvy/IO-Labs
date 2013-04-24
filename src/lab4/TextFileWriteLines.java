@@ -27,7 +27,8 @@ import java.util.List;
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
  */
-public class TextFileWriteLines implements TextFileWriteStrategy {
+public class TextFileWriteLines implements 
+        TextFileWriteStrategy<List<LinkedHashMap<String, String>>> {
     
     private File fileName;
     private BufferedReader inputFile = null;
@@ -83,7 +84,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
      * file is not found, or there is some other file write error
      */
     @Override
-    public final int writeAll(List<LinkedHashMap<String, String>> records,
+    public final void writeRecords(List<LinkedHashMap<String, String>> records,
             boolean hasHeader) throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
@@ -96,7 +97,6 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
         //if file exists, append; otherwise it is created
         boolean append = true;
         PrintWriter out = null;
-        int recordsWritten = 0;
         try {
             out = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
@@ -104,7 +104,6 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
             //formatter throws NullPointerException, IllegalArgumentException
             for (String s : encodedRecords) {
                 out.println(s);
-                recordsWritten++;
             }
         } catch (FileNotFoundException nf) { //PrintWriter exception 
             throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
@@ -121,73 +120,12 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
                     + SPACE_STR + io.getMessage());
         } finally {
             try {
-                inputFile.close();
-            } catch (IOException io) {
+                out.close();
+            } catch (Exception e) {
                 throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
-                        + fileName + io.getMessage());
+                        + fileName + e.getMessage());
             }
         }
-        return recordsWritten;
-    }
-
-    /**
-     * This method writes the one record passed in as a List of LinkedHashMaps
-     * to the previously specified text file.
-     * It uses the previously specified TextFileFormatStrategy to encode the
-     * record of the input and then writes it out to the file.
-     * 
-     * @param records is a List of LinkedHashMaps containing record data to be
-     * written to a text file, not null, not empty
-     * @return the number of records written to the file, expressed as an int
-     * @throws TextFileReadWriteException if input List is null or empty, the 
-     * file is not found, or there is some other file write error
-     */
-    @Override
-    public final int writeOne(List<LinkedHashMap<String, String>> records) 
-            throws TextFileReadWriteException {
-        if (records == null) {
-            throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
-        }
-        if (records.isEmpty()) {
-            throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
-        }
-
-        List<String> encodedRecords = new ArrayList<String>();
-        hasHeader = false; //only writing one record, not header + record
-        //if file exists, append; otherwise it is created
-        boolean append = true;
-        PrintWriter out = null;
-        int recordsWritten = 0;
-        try {
-            out = new PrintWriter(
-                    new BufferedWriter(new FileWriter(fileName, append)));
-            encodedRecords = formatter.encodeRecords(records, hasHeader);
-            for (String s : encodedRecords) {
-                out.println(s);
-                recordsWritten++;
-            }
-        } catch (FileNotFoundException nf) { //PrintWriter exception 
-            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
-                    + SPACE_STR + nf.getMessage());
-        } catch (NullPointerException np) { 
-            throw new TextFileReadWriteException(np.getMessage());
-        } catch (IllegalArgumentException ia) { 
-            throw new TextFileReadWriteException(ia.getMessage());
-        } catch (SecurityException se) { //PrintWriter exception 
-            throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
-                    + SPACE_STR + se.getMessage());
-        } catch (IOException io) { //FileWriter, BufferedWriter exception
-            throw new TextFileReadWriteException(FILE_ERR_MSG + fileName
-                    + SPACE_STR + io.getMessage());
-        } finally {
-            try {
-                inputFile.close();
-            } catch (IOException io) {
-                throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
-                        + fileName + io.getMessage());
-            }
-        }
-        return recordsWritten;
     }
 
     /**
@@ -195,6 +133,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
      * 
      * @return the name of the file to be read
      */
+    @Override
     public final File getFileName() {
         return fileName;
     }
@@ -231,6 +170,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
      * 
      * @return the TextFileFormatStrategy to be used in writing the file data
      */
+    @Override
     public final TextFileFormatStrategy getFormatter() {
         return formatter;
     }
@@ -243,6 +183,7 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
      * previously specified file
      * @throws IllegalArgumentException if the TextFileFormatStrategy is null
      */
+    @Override
     public final void setFormatter(TextFileFormatStrategy formatter)  
             throws IllegalArgumentException {
         if (formatter == null) {
@@ -313,8 +254,8 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
 //        rawData.add("21.65,34.50");
 //        rawData.add("44.0,66.0");
         rawData.add("First Name#Last Name#Street Address#City#State#Zip#Email Address#Phone Nbr");
-        rawData.add("Ariana#Dancer#122 Spruce Lane#Glenwood#IL#60425#noticeme@gmail.com#708-555-1232");
-        rawData.add("Malaya#Science#1234 Wood Street#Griffith#IN#46309#giggles@yahoo.com#464-555-9875");
+//        rawData.add("Ariana#Dancer#122 Spruce Lane#Glenwood#IL#60425#noticeme@gmail.com#708-555-1232");
+//        rawData.add("Malaya#Science#1234 Wood Street#Griffith#IN#46309#giggles@yahoo.com#464-555-9875");
         rawData.add("Nimbus#King#N74 W24450 Red Tail Court#Sussex#WI#53089#walkme@gmail.com#262-555-0317");
         rawData.add("Hobbes#King#N74 W24450 Red Tail Court#Sussex#WI#53089#purrpurr@gmail.com#262-555-0701");
         rawData.add("Laura#Strejcek#405 Walker Road#Normal#IL#60621#myweing@gmail.com#796-555-6752");
@@ -326,7 +267,6 @@ public class TextFileWriteLines implements TextFileWriteStrategy {
             System.out.println(record);
         }
         TextFileWriteLines myWriter = new TextFileWriteLines(myFile, csv);
-        int i = myWriter.writeAll(myMap, true);
-        System.out.println(i + " records written");
+        myWriter.writeRecords(myMap, true);
     }
 }

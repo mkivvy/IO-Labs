@@ -7,36 +7,36 @@ import java.util.Set;
 
 /**
  * CSVPlusFormatter uses the TextFileFormatStrategy interface to handle the
- * encoding and decoding of formatted records using a character delimiter.
- * The valid delimiter characters are specified in the Enum class Delimiters.
- * In addition to the widely used comma and tab characters, Delimiters
- * contains other characters that my be used to separate record fields.
+ * encoding and decoding of formatted records using a character delimiter. The
+ * valid delimiter characters are specified in the Enum class Delimiters. In
+ * addition to the widely used comma and tab characters, Delimiters contains
+ * other characters that my be used to separate record fields.
  * <p>
  * The Enum class delimiter is passed in at instantiation.
  * <p>
- * The method decodeRecords uses the delimiter to convert a List of Strings into 
+ * The method decodeRecords uses the delimiter to convert a List of Strings into
  * a List of LinkedHashMaps containing a key field and value field in each
- * record in the map. 
+ * record in the map.
  * <p>
- * The method encodeRecords converts a List of LinkedHashMaps into a List of 
+ * The method encodeRecords converts a List of LinkedHashMaps into a List of
  * Strings containing records separated by the delimiter.
- * 
+ *
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
-*/
-public class CSVPlusFormatter implements 
-        TextFileFormatStrategy<List<LinkedHashMap<String, String>>,List<String>>{
+ */
+public class CSVPlusFormatter implements
+        TextFileFormatStrategy<List<LinkedHashMap<String, String>>, List<String>> {
 
     private char delimiterChar;
     private String delimiterStr;
     public static final String DOUBLE_BACKSLASH = "\\";
+    public static final String NEW_LINE_STR = "\n";
     public static final int ZERO = 0;
     public static final int ONE = 1;
     public static final int FIRST = 1;
-    public static final String NO_RECORDS_DECODE_MSG 
-            = "There are no records to decode.";
-    public static final String NO_RECORDS_ENCODE_MSG 
-            = "There are no records to encode.";
+    public static final String NO_RECORDS_DECODE_MSG = "There are no records to decode.";
+    public static final String NO_RECORDS_ENCODE_MSG = "There are no records to encode.";
+
     /**
      * Constructor instantiates the class setting the delimiter character and
      * delimiter String used for formatting.
@@ -49,26 +49,25 @@ public class CSVPlusFormatter implements
     }
 
     /**
-     * This method converts a List of Strings (rawData) into a List of 
-     * LinkedHashMaps (decodedData) containing a key field and value field in 
-     * each record in the map.  If the input data does not contain a header
-     * record, integers starting at zero are used as the record keys.  This
-     * method uses the String delimiter set during instantiation to separate
-     * the rawData into fields for the returned map.
-     * 
-     * @param rawData a List of Strings containing record data separated by
-     * a previously specified delimiter character, not null, not empty
+     * This method converts a List of Strings (rawData) into a List of
+     * LinkedHashMaps (decodedData) containing a key field and value field in
+     * each record in the map. If the input data does not contain a header
+     * record, integers starting at zero are used as the record keys. This
+     * method uses the String delimiter set during instantiation to separate the
+     * rawData into fields for the returned map.
+     *
+     * @param rawData a List of Strings containing record data separated by a
+     * previously specified delimiter character, not null, not empty
      * @param hasHeader boolean indicating whether the input List of Strings
      * contains a header record as the first record
-     * @return a List of LinkedHashMaps containing a key field and value field 
-     * in each record in the map.  If there is no header, integer values 
-     * starting at zero are used for the key values.
+     * @return a List of LinkedHashMaps containing a key field and value field
+     * in each record in the map. If there is no header, integer values starting
+     * at zero are used for the key values.
      * @throws NullPointerException if input rawData is null
      * @throws IllegalArgumentException if input rawData is empty
      */
     @Override
-    public final List<LinkedHashMap<String, String>> decodeRecords
-            (List<String> rawData, boolean hasHeader) 
+    public final List<LinkedHashMap<String, String>> decodeRecords(List<String> rawData, boolean hasHeader)
             throws NullPointerException, IllegalArgumentException {
         if (rawData == null) {
             throw new NullPointerException(NO_RECORDS_DECODE_MSG);
@@ -122,24 +121,24 @@ public class CSVPlusFormatter implements
 
     /**
      * This method converts a List of LinkedHashMaps (records) into a List of
-     * Strings (encodedData).  The delimiter character specified at 
-     * instantiation is used between each of the record values for each String 
-     * returned.  If the input data contains header information as the key 
-     * values, a header record is created as the first record in the returned
-     * List.
-     * 
+     * Strings (encodedData). The delimiter character specified at instantiation
+     * is used between each of the record values for each String returned. If
+     * the input data contains header information as the key values, a header
+     * record is created as the first record in the returned List.
+     *
      * @param records a List of LinkedHashMaps containing record data, may or
      * may not include header information, not null, not empty
-     * @param hasHeader boolean indicating whether the input List of 
+     * @param hasHeader boolean indicating whether the input List of
      * LinkedHashMaps contains header information in the key fields
-     * @return a List of Strings containing record data separated by the
-     * previously specified delimiter character
+     * @return a String containing all record data separated by the previously
+     * specified delimiter character with newline characters at the end of each
+     * record
      * @throws NullPointerException if input records is null
      * @throws IllegalArgumentException if input records is empty
      */
     @Override
     public final List<String> encodeRecords
-            (List<LinkedHashMap<String, String>> records, boolean hasHeader) 
+            (List<LinkedHashMap<String, String>> records, boolean hasHeader)
             throws NullPointerException, IllegalArgumentException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_ENCODE_MSG);
@@ -147,10 +146,10 @@ public class CSVPlusFormatter implements
         if (records.isEmpty()) {
             throw new IllegalArgumentException(NO_RECORDS_ENCODE_MSG);
         }
-        //initialize output, an array of Strings ready to be written
-        List<String> encodedData = new ArrayList<String>();
+        ArrayList<String> encodedData = new ArrayList<String>();
         //initialize temporary variables
         int recordCount = ZERO;
+//        StringBuilder encodedData = new StringBuilder();
         StringBuilder line = new StringBuilder();
         Set<String> keys = null;
         //loop through all the records in the map
@@ -167,30 +166,33 @@ public class CSVPlusFormatter implements
                     line.append(key);
                     if (fieldCount < lastField) {
                         line.append(delimiterChar);
-                    }//don't want delimiter after last field
+                    } 
+//                    else { //want new line char after last field
+//                        encodedData.append(NEW_LINE_STR);
+//                    }
                     fieldCount++;
                 }
-                //add the header row to the output list
                 encodedData.add(line.toString());
-                //reset the contents of line
                 line.delete(ZERO, line.length());
             }
             //************* header *************************            
             fieldCount = FIRST; //start w/ first field in record
-            //add each field value from the map to the line followed by delimiter
+            //add each field value from the map to the encodedData followed by delimiter
             for (String key : keys) {
                 String field = (String) record.get(key);
                 line.append(field);
                 if (fieldCount < lastField) {
                     line.append(delimiterChar);
-                }//don't want delimiter after last field
+                }
+//                } else {  //want new line char after last field
+//                    encodedData.append(NEW_LINE_STR);
+//                }
                 fieldCount++;
             }
-            //add the line to output list & reset contents of line
             encodedData.add(line.toString());
             line.delete(ZERO, line.length());
         }
-        return encodedData;
+        return (encodedData);
     }
 
     /**
@@ -213,9 +215,9 @@ public class CSVPlusFormatter implements
 
     /**
      * Sets the value of the private variables delimiterChar and delimiterStr
-     * based on the Enum type passed in.  The character version of the delimiter
+     * based on the Enum type passed in. The character version of the delimiter
      * is used for encoding and the String version is used for decoding.
-     * 
+     *
      * @param delimiter the Enum type character used for formatting
      */
     public final void setDelimiters(Delimiters delimiter) {
@@ -225,7 +227,7 @@ public class CSVPlusFormatter implements
     }
 
     /**
-     * Calculates the hashCode for the class using the delimiterChar and 
+     * Calculates the hashCode for the class using the delimiterChar and
      * delimiterStr fields.
      *
      * @return the hashCode
@@ -239,8 +241,8 @@ public class CSVPlusFormatter implements
     }
 
     /**
-     * Determines if two CSVPlusFormatter objects are equal based on the
-     * fields delimiterChar and delimiterStr.
+     * Determines if two CSVPlusFormatter objects are equal based on the fields
+     * delimiterChar and delimiterStr.
      *
      * @param obj Object of type CSVPlusFormatter, not null
      * @return true if the objects are equal, false if the objects are unequal
@@ -291,8 +293,6 @@ public class CSVPlusFormatter implements
             System.out.println(record);
         }
         List<String> recordStrings = csv.encodeRecords(myMap, true);
-        for (String s : recordStrings) {
-            System.out.println(s);
-        }
+        System.out.println(recordStrings);
     }
 }

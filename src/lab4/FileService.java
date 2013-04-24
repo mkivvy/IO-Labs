@@ -117,12 +117,13 @@ public class FileService {
      * written to a text file, not null, not empty
      * @param hasHeader boolean indicating whether the input data contains
      * header information
+     * @return the number of records written to the file, expressed as an int
      * @throws IllegalArgumentException if input List is null or empty or the 
      * TextFileWriteStrategy is null
      * @throws TextFileReadWriteException if there is an exception during the
      * running of the TextFileWriteStrategy's writeAll method
      */
-    public final void writeTextFile(TextFileWriteStrategy textFileWrite,
+    public final int writeTextFile(TextFileWriteStrategy textFileWrite,
             List<LinkedHashMap<String, String>> records, boolean hasHeader)  
             throws IllegalArgumentException, TextFileReadWriteException {
         if (textFileWrite == null) {
@@ -132,7 +133,8 @@ public class FileService {
             throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
         }
         try {
-            textFileWrite.writeRecords(records, hasHeader);
+            int count = textFileWrite.writeRecords(records, hasHeader);
+            return count;
         } catch (TextFileReadWriteException tfw) {
             throw new TextFileReadWriteException(tfw.getMessage());
         }

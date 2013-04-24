@@ -44,7 +44,7 @@ public abstract interface TextFileFormatStrategy<T,E> {
      * may not include header information, not null, not empty
      * @param hasHeader boolean indicating whether the input List of 
      * LinkedHashMaps contains header information in the key fields
-     * @return a List of Strings containing record 
+     * @return a String containing all record data to be written
      * @throws NullPointerException if input records is null
      * @throws IllegalArgumentException if input records is empty
      */

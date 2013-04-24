@@ -84,7 +84,7 @@ public class TextFileWriteLines implements
      * file is not found, or there is some other file write error
      */
     @Override
-    public final void writeRecords(List<LinkedHashMap<String, String>> records,
+    public final int writeRecords(List<LinkedHashMap<String, String>> records,
             boolean hasHeader) throws TextFileReadWriteException {
         if (records == null) {
             throw new NullPointerException(NO_RECORDS_TO_WRITE_MSG);
@@ -93,18 +93,23 @@ public class TextFileWriteLines implements
             throw new IllegalArgumentException(NO_RECORDS_TO_WRITE_MSG);
         }
 
-        List<String> encodedRecords = new ArrayList<String>();
         //if file exists, append; otherwise it is created
         boolean append = true;
-        PrintWriter out = null;
+        PrintWriter outfile = null;
+        int recordCount = 0;
         try {
-            out = new PrintWriter(
+            outfile = new PrintWriter(
                     new BufferedWriter(new FileWriter(fileName, append)));
-            encodedRecords = formatter.encodeRecords(records, hasHeader);
-            //formatter throws NullPointerException, IllegalArgumentException
+            List<String> encodedRecords = formatter.encodeRecords(records, hasHeader);
             for (String s : encodedRecords) {
-                out.println(s);
+                outfile.println(s);
+                recordCount++;
             }
+            //tried to return just one formatted String & write it to file, BUT
+            //though the String looked ok w/ newlines, it wouldn't write records  
+            //on separatelines in the file - went back to loop w/rec count
+//            String encodedRecords = formatter.encodeRecords(records, hasHeader);
+//            outfile.println(encodedRecords);
         } catch (FileNotFoundException nf) { //PrintWriter exception 
             throw new TextFileReadWriteException(FILE_NOT_FOUND_MSG + fileName
                     + SPACE_STR + nf.getMessage());
@@ -120,12 +125,13 @@ public class TextFileWriteLines implements
                     + SPACE_STR + io.getMessage());
         } finally {
             try {
-                out.close();
+                outfile.close();
             } catch (Exception e) {
                 throw new TextFileReadWriteException(FILE_CLOSE_ERR_MSG 
                         + fileName + e.getMessage());
             }
         }
+        return recordCount;
     }
 
     /**
@@ -256,8 +262,8 @@ public class TextFileWriteLines implements
         rawData.add("First Name#Last Name#Street Address#City#State#Zip#Email Address#Phone Nbr");
 //        rawData.add("Ariana#Dancer#122 Spruce Lane#Glenwood#IL#60425#noticeme@gmail.com#708-555-1232");
 //        rawData.add("Malaya#Science#1234 Wood Street#Griffith#IN#46309#giggles@yahoo.com#464-555-9875");
-        rawData.add("Nimbus#King#N74 W24450 Red Tail Court#Sussex#WI#53089#walkme@gmail.com#262-555-0317");
-        rawData.add("Hobbes#King#N74 W24450 Red Tail Court#Sussex#WI#53089#purrpurr@gmail.com#262-555-0701");
+//        rawData.add("Nimbus#King#N74 W24450 Red Tail Court#Sussex#WI#53089#walkme@gmail.com#262-555-0317");
+//        rawData.add("Hobbes#King#N74 W24450 Red Tail Court#Sussex#WI#53089#purrpurr@gmail.com#262-555-0701");
         rawData.add("Laura#Strejcek#405 Walker Road#Normal#IL#60621#myweing@gmail.com#796-555-6752");
         rawData.add("Deanna#Moore#431 Cortez Court#Naperville#IL#60789#ilovecats@gmail.com#708-555-6688");
         CSVPlusFormatter csv = new CSVPlusFormatter(Delimiters.POUND_SIGN);

@@ -27,10 +27,11 @@ public abstract interface TextFileWriteStrategy<T> {
      * containing record data to be written to a text file, not null, not empty
      * @param hasHeader boolean indicating whether the input data contains
      * header information
+     * @return the number of records written to the file, expressed as an int
      * @throws TextFileReadWriteException if input List is null or empty, the 
      * file is not found, or there is some other file write error
      */
-    public abstract void writeRecords (T records, boolean hasHeader);
+    public abstract int writeRecords (T records, boolean hasHeader);
 //            (List<LinkedHashMap<String, String>> records, boolean hasHeader);
 
     /**

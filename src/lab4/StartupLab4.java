@@ -18,11 +18,11 @@ public class StartupLab4 {
             + File.separatorChar + "AdvJavaCourse"
             + File.separatorChar + "ContactList.txt");
         
-        File myFile2 = new File(File.separatorChar + "Users" 
-            + File.separatorChar + "Mary"
-            + File.separatorChar + "Documents"
-            + File.separatorChar + "AdvJavaCourse"
-            + File.separatorChar + "GarageFees.txt");
+//        File myFile = new File(File.separatorChar + "Users" 
+//            + File.separatorChar + "Mary"
+//            + File.separatorChar + "Documents"
+//            + File.separatorChar + "AdvJavaCourse"
+//            + File.separatorChar + "GarageFees.txt");
         
         //instantiate the FileService
         FileService myFileService = new FileService();
@@ -58,23 +58,23 @@ public class StartupLab4 {
         
 //************TEST WRITING ******************************************* 
         //instantiate the TextFileWriter and TextFileFormatter
-        TextFileWriteLines myWriter = new TextFileWriteLines(myFile2,
+        TextFileWriteLines myWriter = new TextFileWriteLines(myFile,
                new CSVPlusFormatter(Delimiters.PERCENT_SIGN));
         //define the arraylist for writing to file
         List<String> myData = new ArrayList<String>();
 //        myData.add("Total Fees,Total Hours" );
 //        myData.add("21.65,34.50");
 //        myData.add("44.0,66.00");
-////        myData.add("First Name%Last Name%Street Address%City%State%Zip%Email Address%Phone Nbr");
-////        myData.add("Ariana%Dancer%122 Spruce Lane%Glenwood%IL%60425%noticeme@gmail.com%708-555-1232");
-////        myData.add("Malaya%Science%1234 Wood Street%Griffith%IN%46309%giggles@yahoo.com%464-555-9875");
+//        myData.add("First Name%Last Name%Street Address%City%State%Zip%Email Address%Phone Nbr");
+//        myData.add("Ariana%Dancer%122 Spruce Lane%Glenwood%IL%60425%noticeme@gmail.com%708-555-1232");
+//        myData.add("Malaya%Science%1234 Wood Street%Griffith%IN%46309%giggles@yahoo.com%464-555-9875");
         myData.add("Nimbus%King%N74 W24450 Red Tail Court%Sussex%WI%53089%walkme@gmail.com%262-555-0317");
         myData.add("Hobbes%King%N74 W24450 Red Tail Court%Sussex%WI%53089%purrpurr@gmail.com%262-555-0701");
         myData.add("Laura%Strejcek%405 Walker Road%Normal%IL%60621%myweing@gmail.com%796-555-6752");
         List<LinkedHashMap<String, String>> myMap = converter.convertListToMap
                 (myData, Delimiters.PERCENT_SIGN, false);
-        myFileService.writeTextFile(myWriter, myMap, false);
-        System.out.println("Write completed successfully");
+        int recCount = myFileService.writeTextFile(myWriter, myMap, false);
+        System.out.println("Write completed successfully: " + recCount + " records written");
 //        
 //        List<String> myData2 = new ArrayList<String>();
 //        myData2.add("64.5,96.05");

@@ -107,7 +107,7 @@ public class TextFileWriteLines implements
             }
             //tried to return just one formatted String & write it to file, BUT
             //though the String looked ok w/ newlines, it wouldn't write records  
-            //on separatelines in the file - went back to loop w/rec count
+            //on separate lines in the file - went back to loop w/rec count
 //            String encodedRecords = formatter.encodeRecords(records, hasHeader);
 //            outfile.println(encodedRecords);
         } catch (FileNotFoundException nf) { //PrintWriter exception 

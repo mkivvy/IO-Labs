@@ -1,14 +1,13 @@
 package lab4;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 /**
- * CSVPlusFormatter uses the TextFileFormatStrategy interface to handle the
- * encoding and decoding of formatted records using a character delimiter 
- * between unquoted fields - e.g. 23.00,87.25 . 
+ * CSVPlusQuoteFormatter uses the TextFileFormatStrategy interface to handle 
+ * the encoding and decoding of formatted records using a character delimiter 
+ * between fields wrapped in double quotes - e.g. "23.00","87.25" . 
  * The valid delimiter characters are specified in the Enum class Delimiters. 
  * In addition to the widely used comma and tab characters, Delimiters contains
  * other characters that my be used to separate record fields.
@@ -25,12 +24,13 @@ import java.util.Set;
  * @author Mary King, mking@my.wctc.edu
  * @version 1.0
  */
-public class CSVPlusFormatter implements
-        TextFileFormatStrategy<List<LinkedHashMap<String, String>>, List<String>> {
-
+public class CSVPlusQuoteFormatter implements
+    TextFileFormatStrategy<List<LinkedHashMap<String, String>>, List<String>> {
+    
     private char delimiterChar;
     private String delimiterStr;
     public static final String DOUBLE_BACKSLASH = "\\";
+    private static final String DOUBLE_QUOTE = "\"";
     public static final String NEW_LINE_STR = "\n";
     public static final int ZERO = 0;
     public static final int ONE = 1;
@@ -47,17 +47,19 @@ public class CSVPlusFormatter implements
      * @param delimiter of type Delimiters specifying the character used as the
      * record's field separator
      */
-    public CSVPlusFormatter(Delimiters delimiter) {
+    public CSVPlusQuoteFormatter(Delimiters delimiter) {
         setDelimiters(delimiter);
     }
 
     /**
      * This method converts a List of Strings (rawData) into a List of
      * LinkedHashMaps (decodedData) containing a key field and value field in
-     * each record in the map. If the input data does not contain a header
-     * record, integers starting at zero are used as the record keys. This
-     * method uses the String delimiter set during instantiation to separate the
-     * rawData into fields for the returned map.
+     * each record in the map. 
+     * If the input data does not contain a header record, integers starting at 
+     * zero are used as the record keys. 
+     * This method uses the String delimiter set during instantiation, 
+     * containing the delimiter character surrounded with double quotes, to 
+     * separate the rawData into fields for the returned map.
      *
      * @param rawData a List of Strings containing record data separated by a
      * previously specified delimiter character, not null, not empty
@@ -70,7 +72,8 @@ public class CSVPlusFormatter implements
      * @throws IllegalArgumentException if input rawData is empty
      */
     @Override
-    public final List<LinkedHashMap<String, String>> decodeRecords(List<String> rawData, boolean hasHeader)
+    public final List<LinkedHashMap<String, String>> 
+            decodeRecords(List<String> rawData, boolean hasHeader)
             throws NullPointerException, IllegalArgumentException {
         if (rawData == null) {
             throw new NullPointerException(NO_RECORDS_DECODE_MSG);
@@ -90,8 +93,10 @@ public class CSVPlusFormatter implements
         //Now we loop through the list of strings(lines) passed in
         for (String data : rawData) {
             lineCount++;
+            //remove beginning & ending double quotes
+            String dataSubstr = data.substring(ONE, data.length() - ONE); 
             //split the line into a string array using the specified delimiter
-            String[] splitData = data.split(delimiterStr);
+            String[] splitData = dataSubstr.split(delimiterStr);
             if (hasHeader && (lineCount == FIRST)) {
                 header = splitData; //this is the header row, set header values
             }
@@ -124,9 +129,11 @@ public class CSVPlusFormatter implements
 
     /**
      * This method converts a List of LinkedHashMaps (records) into a List of
-     * Strings (encodedData). The delimiter character specified at instantiation
-     * is used between each of the record values for each String returned. If
-     * the input data contains header information as the key values, a header
+     * Strings (encodedData). 
+     * The delimiter character specified at instantiation is used between each 
+     * of the record values for each String returned. 
+     * Each record value is also surrounded by double quotes.  
+     * If the input data contains header information as the key values, a header
      * record is created as the first record in the returned List.
      *
      * @param records a List of LinkedHashMaps containing record data, may or
@@ -152,7 +159,6 @@ public class CSVPlusFormatter implements
         ArrayList<String> encodedData = new ArrayList<String>();
         //initialize temporary variables
         int recordCount = ZERO;
-//        StringBuilder encodedData = new StringBuilder();
         StringBuilder line = new StringBuilder();
         Set<String> keys = null;
         //loop through all the records in the map
@@ -166,13 +172,14 @@ public class CSVPlusFormatter implements
                 //This creates the header row by appending each header name
                 //followed by the delimiter
                 for (String key : keys) {
-                    line.append(key);
                     if (fieldCount < lastField) {
-                        line.append(delimiterChar);
-                    } 
-//                    else { //want new line char after last field
-//                        encodedData.append(NEW_LINE_STR);
-//                    }
+                        line.append(DOUBLE_QUOTE).append(key)
+                                .append(DOUBLE_QUOTE)
+                                .append(delimiterChar);
+                    } else {
+                        line.append(DOUBLE_QUOTE).append(key)
+                                .append(DOUBLE_QUOTE);
+                    }
                     fieldCount++;
                 }
                 encodedData.add(line.toString());
@@ -183,13 +190,14 @@ public class CSVPlusFormatter implements
             //add each field value from the map to the encodedData followed by delimiter
             for (String key : keys) {
                 String field = (String) record.get(key);
-                line.append(field);
                 if (fieldCount < lastField) {
-                    line.append(delimiterChar);
+                    line.append(DOUBLE_QUOTE).append(field)
+                            .append(DOUBLE_QUOTE)
+                            .append(delimiterChar);
+                } else {
+                    line.append(DOUBLE_QUOTE).append(field)
+                            .append(DOUBLE_QUOTE);
                 }
-//                } else {  //want new line char after last field
-//                    encodedData.append(NEW_LINE_STR);
-//                }
                 fieldCount++;
             }
             encodedData.add(line.toString());
@@ -218,15 +226,16 @@ public class CSVPlusFormatter implements
 
     /**
      * Sets the value of the private variables delimiterChar and delimiterStr
-     * based on the Enum type passed in. The character version of the delimiter
-     * is used for encoding and the String version is used for decoding.
+     * based on the Enum type passed in. 
+     * The character version of the delimiter is used for encoding and the 
+     * String version is used for decoding.
      *
      * @param delimiter the Enum type character used for formatting
      */
     public final void setDelimiters(Delimiters delimiter) {
         delimiterChar = delimiter.getValue();
-        delimiterStr = DOUBLE_BACKSLASH + delimiterChar;
-//        System.out.printf("char=%c  string =%s", delimiterChar, delimiterStr);
+        delimiterStr = DOUBLE_QUOTE + DOUBLE_BACKSLASH 
+                + delimiterChar + DOUBLE_QUOTE;
     }
 
     /**
@@ -236,29 +245,29 @@ public class CSVPlusFormatter implements
      * @return the hashCode
      */
     @Override
-    public final int hashCode() {
-        int hash = 5;
-        hash = 47 * hash + this.delimiterChar;
-        hash = 47 * hash + (this.delimiterStr != null ? this.delimiterStr.hashCode() : 0);
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + this.delimiterChar;
+        hash = 31 * hash + (this.delimiterStr != null ? this.delimiterStr.hashCode() : 0);
         return hash;
     }
 
     /**
-     * Determines if two CSVPlusFormatter objects are equal based on the fields
-     * delimiterChar and delimiterStr.
+     * Determines if two CSVPlusQuoteFormatter objects are equal based on the 
+     * fields delimiterChar and delimiterStr.
      *
-     * @param obj Object of type CSVPlusFormatter, not null
+     * @param obj Object of type CSVPlusQuoteFormatter, not null
      * @return true if the objects are equal, false if the objects are unequal
      */
     @Override
-    public final boolean equals(Object obj) {
+    public boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final CSVPlusFormatter other = (CSVPlusFormatter) obj;
+        final CSVPlusQuoteFormatter other = (CSVPlusQuoteFormatter) obj;
         if (this.delimiterChar != other.delimiterChar) {
             return false;
         }
@@ -270,32 +279,38 @@ public class CSVPlusFormatter implements
 
     /**
      * Returns a String object containing the values of all the private fields
-     * of the CSVPlusFormatter class - delimiterChar and delimiterStr.
+     * of the CSVPlusQuoteFormatter class - delimiterChar and delimiterStr.
      *
      * @return a String containing the values of all the private fields of the
      * class
      */
     @Override
-    public final String toString() {
-        return "CSVPlusFormatter{" + "delimiterChar=" + delimiterChar + ", delimiterStr=" + delimiterStr + '}';
+    public String toString() {
+        return "CSVPlusQuoteFormatter{" + "delimiterChar=" + delimiterChar + ", delimiterStr=" + delimiterStr + '}';
     }
 
     public static void main(String[] args) {
 
         List<String> rawData = new ArrayList<String>();
-//        rawData.add("Total Fees,Total Hours" );
-//        rawData.add("21.65,34.50");
-//        rawData.add("44.0,66.0");
-        rawData.add("First Name!Last Name!Street Address!City!State!Zip!Email Address!Phone Nbr");
-        rawData.add("Malaya!Science!1234 Wood Street!Griffith!IN!46309!giggles@yahoo.com!464-555-9875");
-        rawData.add("Laura!Strecjek!405 Walker Road!Normal!IL!60621!myweing@gmail.com!796-555-6752");
-        CSVPlusFormatter csv = new CSVPlusFormatter(Delimiters.EXLAMATION_POINT);
+        rawData.add("\"Total Fees\"|\"Total Hours\"" );
+        rawData.add("\"21.65\"|\"34.50\"");
+        rawData.add("\"44.0\"|\"66.0\"");
+//        rawData.add("\"First Name\"#\"Last Name\"#\"Street Address\"#"
+//                +"\"City\"#\"State\"#\"Zip\"#\"Email Address\"#\"Phone Nbr\"");
+//        rawData.add("\"Malaya\"#\"Science\"#\"1234 Wood Street\"#"
+//                +"\"Griffith\"#\"IN\"#\"46309\"#\"giggles@yahoo.com\"#\"464-555-9875\"");
+//        rawData.add("\"Laura\"#\"Strejcek\"#\"405 Walker Road\"#"
+//                + "\"Normal\"#\"IL\"#\"60621\"#\"myweing@gmail.com\"#\"796-555-6752\"");
+        CSVPlusQuoteFormatter csv = new CSVPlusQuoteFormatter(Delimiters.VERTICAL_BAR);
         List<LinkedHashMap<String, String>> myMap =
                 csv.decodeRecords(rawData, true);
         for (LinkedHashMap record : myMap) {
             System.out.println(record);
         }
         List<String> recordStrings = csv.encodeRecords(myMap, true);
-        System.out.println(recordStrings);
+        for (String s : recordStrings) {
+            System.out.println(s);
+        }
     }
+
 }
